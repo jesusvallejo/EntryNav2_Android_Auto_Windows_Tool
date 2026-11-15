@@ -10,13 +10,14 @@ import tempfile
 import threading
 import time
 import urllib.request
+import webbrowser
 from datetime import datetime
 from pathlib import Path
 
 from ..config import CarConfigManager, SUPPORTED_FLAGS
 from ..diagnostics import LogManager, WifiAnalyzer
 from ..network import NetworkDiagnostics
-from ..releases import ReleaseManager, BUILTIN_RELEASES
+from ..releases import ReleaseManager, BUILTIN_RELEASES, UPSTREAM_URL, DEFAULT_REPO
 from ..safety import SafetyWorkflow
 from ..transport import (
     DEFAULT_IP,
@@ -106,8 +107,19 @@ def run_gui():
     top_frame.pack(fill="x", padx=12, pady=(12, 6))
 
     ttk.Label(top_frame, text="BMW EntryNav2 Connection (Engine Running):", style="Title.TLabel").grid(
-        row=0, column=0, columnspan=3, sticky="w", pady=(0, 6)
+        row=0, column=0, columnspan=4, sticky="w", pady=(0, 6)
     )
+
+    upstream_link = tk.Label(
+        top_frame,
+        text=f"Official Upstream: github.com/{DEFAULT_REPO}",
+        bg=BG_PANEL,
+        fg=BMW_LIGHT_BLUE,
+        cursor="hand2",
+        font=("Segoe UI", 9, "underline"),
+    )
+    upstream_link.grid(row=0, column=4, columnspan=4, sticky="e", pady=(0, 6), padx=4)
+    upstream_link.bind("<Button-1>", lambda e: webbrowser.open(UPSTREAM_URL))
 
     ttk.Label(top_frame, text="Car IP:", style="Panel.TLabel").grid(row=1, column=0, sticky="w", padx=4)
     ip_var = tk.StringVar(value=DEFAULT_IP)
@@ -492,7 +504,20 @@ Ready. Click 'Test Car Connection' or 'Check AA Version' to begin.
     rel_box = ttk.Frame(up_frame, style="Panel.TFrame", padding=10)
     rel_box.pack(fill="x", pady=4)
 
-    ttk.Label(rel_box, text="Step 1: Select Release or Local Archive", style="Title.TLabel").pack(anchor="w")
+    rel_header_frame = ttk.Frame(rel_box, style="Panel.TFrame")
+    rel_header_frame.pack(fill="x", pady=(0, 4))
+    ttk.Label(rel_header_frame, text="Step 1: Select Release Archive (Dynamic Upstream Fetch)", style="Title.TLabel").pack(side="left")
+    upstream_btn = tk.Button(
+        rel_header_frame,
+        text=f"🌐 Open Upstream Repo ({DEFAULT_REPO})",
+        command=lambda: webbrowser.open(UPSTREAM_URL),
+        bg=BG_INPUT,
+        fg=BMW_LIGHT_BLUE,
+        relief="flat",
+        font=("Segoe UI", 8, "underline"),
+        padx=6,
+    )
+    upstream_btn.pack(side="right")
 
     rel_ctrl_frame = ttk.Frame(rel_box, style="Panel.TFrame")
     rel_ctrl_frame.pack(fill="x", pady=6)
@@ -504,13 +529,13 @@ Ready. Click 'Test Car Connection' or 'Check AA Version' to begin.
 
     def fetch_rels():
         def _worker():
-            GLOBAL_LOGGER.log("INFO", "Fetching releases from GitHub...")
+            GLOBAL_LOGGER.log("INFO", f"Fetching live releases from {UPSTREAM_URL}...")
             try:
                 rels = ReleaseManager.get_releases()
                 fetched_releases.clear()
                 fetched_releases.extend(rels)
                 display_items = [
-                    f"{r['tag']} ({r['published_at']}) {'[PRE-RELEASE]' if r['prerelease'] else '[STABLE]'}"
+                    f"{r['tag']} ({r['published_at'][:10] if r.get('published_at') else ''}) {'[PRE-RELEASE]' if r['prerelease'] else '[STABLE]'}"
                     for r in rels
                 ]
                 def _update():
@@ -518,7 +543,7 @@ Ready. Click 'Test Car Connection' or 'Check AA Version' to begin.
                     if display_items:
                         rel_combobox.current(0)
                         on_rel_selected(None)
-                    GLOBAL_LOGGER.log("OK", f"Loaded {len(rels)} release(s).")
+                    GLOBAL_LOGGER.log("OK", f"Loaded {len(rels)} release(s) dynamically from GitHub.")
                 root.after(0, _update)
             except Exception as e:
                 GLOBAL_LOGGER.log("ERROR", f"Error fetching releases: {e}")
@@ -552,19 +577,11 @@ Ready. Click 'Test Car Connection' or 'Check AA Version' to begin.
         idx = rel_combobox.current()
         if 0 <= idx < len(fetched_releases):
             r = fetched_releases[idx]
-            if r.get("sha_hash"):
-                expected_sha_var.set(r["sha_hash"])
-            elif r.get("sha_url"):
-                def _get_sha():
-                    try:
-                        req = urllib.request.Request(r["sha_url"], headers={"User-Agent": "EntryNav2-Windows-Tool/2.0"})
-                        with urllib.request.urlopen(req, timeout=10) as resp:
-                            sha_content = resp.read().decode("utf-8").strip()
-                            sha_hash = sha_content.split()[0]
-                            root.after(0, lambda: expected_sha_var.set(sha_hash))
-                    except Exception:
-                        pass
-                threading.Thread(target=_get_sha, daemon=True).start()
+            def _get_sha():
+                sha = ReleaseManager.fetch_sha256_for_release(r)
+                if sha:
+                    root.after(0, lambda: expected_sha_var.set(sha))
+            threading.Thread(target=_get_sha, daemon=True).start()
 
     rel_combobox.bind("<<ComboboxSelected>>", on_rel_selected)
 

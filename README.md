@@ -4,6 +4,16 @@ A dedicated Windows suite designed specifically for the [EntryNav2-Android-Auto]
 
 ---
 
+## 🔗 Upstream Repository & Attribution
+
+This tool is a dedicated management, flashing, and diagnostics suite for:
+👉 **[Jiraiya43/EntryNav2-Android-Auto](https://github.com/Jiraiya43/EntryNav2-Android-Auto)**
+
+* **Core Project & Binaries**: All credit for reverse-engineering BMW EntryNav2 (EntryEvo), Wayland/Qt integration, and developing the Android Auto ARM binaries (`entry-aad`, `aa-supervisor`, `libEntryAad.so`) belongs to **Jiraiya43** and the EntryNav2 community contributors.
+* **Dynamic Release Sourcing**: All past, current, and future releases, tar archives, and SHA-256 digests are dynamically fetched directly from the upstream [GitHub Releases](https://github.com/Jiraiya43/EntryNav2-Android-Auto/releases) feed. Nothing dynamic is hardcoded.
+
+---
+
 ## 🌟 Key Capabilities
 
 1. **Maximum Execution Transparency (Real-Time Live Streaming)**:
@@ -84,10 +94,10 @@ A dedicated Windows suite designed specifically for the [EntryNav2-Android-Auto]
 
 ### Launching the Tool
 
-* **Zero-Window Invisible Launch**: Double-click [Launch_Silent.vbs](file:///c:/Users/Chusa%20Collados/Downloads/EntryNav2_Windows_Tool/Launch_Silent.vbs) to start the tool with **no PowerShell or CMD console screen visible at all**.
-* **Standard Launch**: Double-click [Launch_Windows_Tool.bat](file:///c:/Users/Chusa%20Collados/Downloads/EntryNav2_Windows_Tool/Launch_Windows_Tool.bat).
+* **Zero-Window Invisible Launch**: Double-click `Launch_Silent.vbs` to start the tool with **no PowerShell or CMD console screen visible at all**.
+* **Standard Launch**: Double-click `Launch_Windows_Tool.bat`.
 * **PowerShell WPF Native Mode**: Run `.\windows\Launch_Tool.bat --powershell` (the console window automatically hides on startup so only the GUI is displayed).
-* **Standalone Single-File EXE**: Run `windows\build_exe.bat` to build a portable `dist\EntryNav2_Manager.exe` with zero Python prerequisites.
+* **Standalone Single-File EXE**: Run `windows\dist\EntryNav2_Manager.exe` (or build from source with `windows\build_exe.bat`) with zero Python prerequisites.
 
 ---
 

@@ -10,6 +10,14 @@ if "%1"=="--powershell" (
     goto :RUN_POWERSHELL
 )
 
+:: Prefer compiled standalone EXE if present and launched without CLI arguments
+if exist "%~dp0dist\EntryNav2_Manager.exe" (
+    if "%1"=="" (
+        start "" "%~dp0dist\EntryNav2_Manager.exe"
+        exit /b 0
+    )
+)
+
 :: Prefer pythonw.exe / pyw.exe to run without a console window
 where pythonw.exe >nul 2>&1
 if %ERRORLEVEL% equ 0 (

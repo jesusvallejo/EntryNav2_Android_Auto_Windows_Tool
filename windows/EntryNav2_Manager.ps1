@@ -3,6 +3,11 @@
 # Copyright (c) 2026 Jiraiya43 / EntryNav2 Community
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 # ==============================================================================
+# Official Upstream Project:
+#   https://github.com/Jiraiya43/EntryNav2-Android-Auto
+# Created and maintained by Jiraiya43 and the EntryNav2 community.
+# All releases, archives, and checksums are retrieved dynamically from upstream.
+# ==============================================================================
 # A native Windows WPF application with zero external dependencies.
 # Runs on Windows 10 & 11 out of the box (PowerShell 5.1 / 7).
 # ==============================================================================
@@ -920,6 +925,10 @@ function Load-ReleasesToUI {
                 } elseif ($r.created_at -and $r.created_at.Length -ge 10) {
                     $pubDate = $r.created_at.Substring(0, 10)
                 }
+                $bodySha = $null
+                if ($r.body -and $r.body -match '\b([a-fA-F0-9]{64})\b') {
+                    $bodySha = $Matches[1].ToLower()
+                }
                 $entry = [PSCustomObject]@{
                     Tag        = $r.tag_name
                     Name       = $r.name
@@ -928,7 +937,7 @@ function Load-ReleasesToUI {
                     TarName    = $tarAsset.name
                     TarUrl     = $tarAsset.browser_download_url
                     ShaUrl     = if ($shaAsset) { $shaAsset.browser_download_url } else { $null }
-                    ShaHash    = $null
+                    ShaHash    = $bodySha
                 }
             } else {
                 continue
@@ -959,7 +968,7 @@ $btnFetchReleases.Add_Click({
     Write-GuiLog "Querying GitHub ($repo) for releases..."
     $loadedOk = $false
     try {
-        $apiUrl = "https://api.github.com/repos/$repo/releases"
+        $apiUrl = "https://api.github.com/repos/$repo/releases?per_page=100"
         $jsonStr = $null
         try {
             $wc = New-Object System.Net.WebClient
@@ -1002,8 +1011,12 @@ $cmbReleases.Add_SelectionChanged({
                 $wc = New-Object System.Net.WebClient
                 $wc.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) EntryNav2-Windows-Manager")
                 $shaRaw = $wc.DownloadString($shaUrl).Trim()
-                $cand = ($shaRaw -split '\s+')[0].Trim().ToLower()
-                if ($cand.Length -eq 64) { $txtExpectedSHA.Text = $cand }
+                if ($shaRaw -match '\b([a-fA-F0-9]{64})\b') {
+                    $txtExpectedSHA.Text = $Matches[1].ToLower()
+                } else {
+                    $cand = ($shaRaw -split '\s+')[0].Trim().ToLower()
+                    if ($cand.Length -eq 64) { $txtExpectedSHA.Text = $cand }
+                }
             } catch {}
         }
     }
@@ -1156,18 +1169,24 @@ $btnStartUpdate.Add_Click({
         }
         Write-GuiLog "✅ Archive successfully uploaded to /tmp/."
 
-        # Inspect folder inside archive
-        $vStr = "current"
-        if ($tarName -match '(?:entrynav2-android-auto|entry-aad)-([0-9a-zA-Z\.\-]+)-armhf\.tar') {
-            $vStr = $Matches[1]
+        # Inspect folder inside archive dynamically directly from head unit
+        $resFolder = Invoke-CarSSH -IP $targetIP -User $targetUser -Pass $targetPass -Command "tar -tf /tmp/$tarName 2>/dev/null | head -n 1 | cut -d/ -f1" -Port $targetPort
+        $archiveFolder = $resFolder.Output.Trim()
+        if (-not $archiveFolder) {
+            $vStr = "current"
+            if ($tarName -match '(?:entrynav2-android-auto|entry-aad)-([0-9a-zA-Z\.\-]+)-armhf\.tar') {
+                $vStr = $Matches[1]
+            }
+            $folderPrefix = if ($tarName -like "*entrynav2*") { "entrynav2-android-auto" } else { "entry-aad" }
+            $archiveFolder = "$folderPrefix-$vStr"
         }
-        $folderPrefix = if ($tarName -like "*entrynav2*") { "entrynav2-android-auto" } else { "entry-aad" }
-        $extractedFolder = "/tmp/$folderPrefix-$vStr"
+        $extractedFolder = "/tmp/$archiveFolder"
+        Write-GuiLog "ℹ️ Dynamically detected staging folder on head unit: $archiveFolder"
 
         # 4. Unpack in /tmp and verify MD5SUMS
         Write-GuiLog "[Step 5/8] Extracting archive and verifying MD5 on car..."
         Update-FlashProgress -Step 5 -StatusText "Step 5/8: In-car MD5 check..."
-        $cmdUnpack = "cd /tmp && rm -rf $folderPrefix-$vStr && tar -xvf $tarName && cd $folderPrefix-$vStr && md5sum -c MD5SUMS"
+        $cmdUnpack = "cd /tmp && rm -rf $archiveFolder && tar -xvf $tarName && cd $archiveFolder && md5sum -c MD5SUMS"
         $resMd5 = Invoke-CarSSH -IP $targetIP -User $targetUser -Pass $targetPass -Command $cmdUnpack -Port $targetPort
         if ($resMd5.ExitCode -ne 0 -or $resMd5.Output -like "*FAILED*") {
             Write-GuiLog "❌ MD5SUMS check failed on car! Archive corrupted in transit."
@@ -1230,7 +1249,7 @@ cp -v opt/hmi/data/ro/Plugins/EntryAad/* /opt/hmi/data/ro/Plugins/EntryAad/ && \
 cp -v opt/aa/* /opt/aa/ && \
 chmod 755 /opt/aa/entry-aad /opt/aa/aa-supervisor /opt/hmi/data/ro/Plugins/EntryAad/libEntryAad.so && \
 touch /opt/aa/.installed-by-entryaad /opt/hmi/data/ro/Plugins/EntryAad/.installed-by-entryaad && \
-printf "version=$folderPrefix-$vStr\ntag=$folderPrefix-$vStr\nsha256=$expectedSha\ninstalled_at=`$(date -Iseconds 2>/dev/null || date)\n" > /opt/aa/.version && \
+printf "version=$archiveFolder\ntag=$archiveFolder\nsha256=$expectedSha\ninstalled_at=`$(date -Iseconds 2>/dev/null || date)\n" > /opt/aa/.version && \
 cp /opt/aa/.version /var/local/data/AA/installed_version && \
 echo "Syncing flash..." && \
 sync && \
@@ -1271,7 +1290,7 @@ echo "Flash write completed."
         Update-FlashProgress -Step 8 -StatusText "✅ Done / Completed"
         Write-GuiLog "=========================================================="
         Write-GuiLog "🎉 INSTALLATION / UPDATE COMPLETED SUCCESSFULLY!"
-        Write-GuiLog "   Installed Version ID: $folderPrefix-$vStr"
+        Write-GuiLog "   Installed Version ID: $archiveFolder"
         Write-GuiLog "   Please reboot head unit and start Android Auto in iDrive."
         Write-GuiLog "=========================================================="
 

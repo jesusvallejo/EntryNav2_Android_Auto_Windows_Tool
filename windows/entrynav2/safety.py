@@ -277,6 +277,13 @@ class SafetyWorkflow:
             return False
         self.log("OK", "✅ Upload to RAM-disk /tmp/ complete.")
 
+        # Dynamically inspect archive contents on the car to guarantee 100% accurate staging folder
+        code_tar, out_tar, _ = self.ssh.run_command(f"tar -tf /tmp/{tar_name} 2>/dev/null | head -n 1 | cut -d/ -f1")
+        if code_tar == 0 and out_tar.strip():
+            archive_folder = out_tar.strip()
+            extracted_folder = f"/tmp/{archive_folder}"
+            self.log("INFO", f"Dynamically resolved staging folder from archive: {archive_folder}")
+
         # 4. Extract in /tmp and verify MD5SUMS
         self.log("STEP", "[Step 4/8] Extracting archive and checking MD5 checksums on car...")
         unpack_cmd = f"cd /tmp && rm -rf {archive_folder} && tar -xvf {tar_name} && cd {archive_folder} && md5sum -c MD5SUMS"
