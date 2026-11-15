@@ -953,7 +953,7 @@ rm -rf /var/local/data/AA
    • Head Unit IP: 169.254.1.0
    • Port:         22
    • Username:     root
-   • Password:     Entry0?Evo!1
+   • Password:     (Pre-configured in tool)
 """,
     )
 

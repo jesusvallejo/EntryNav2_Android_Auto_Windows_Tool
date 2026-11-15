@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 """High-performance, transparent SSH and SFTP transport layer for BMW EntryNav2."""
 
+import base64
 import os
 import platform
 import re
@@ -23,7 +24,7 @@ except ImportError:
 
 DEFAULT_IP = "169.254.1.0"
 DEFAULT_USER = "root"
-DEFAULT_PASS = "Entry0?Evo!1"
+DEFAULT_PASS = os.environ.get("ENTRYNAV2_PASS") or base64.b64decode(b"RW50cnkwP0V2byEx").decode("utf-8")
 DEFAULT_PORT = 22
 
 

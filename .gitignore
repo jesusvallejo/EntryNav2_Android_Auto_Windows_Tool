@@ -13,10 +13,10 @@ windows/build/
 htmlcov/
 
 # Local diagnostic logs and sessions
-BMW_Logs/*.log
-BMW_Logs/Logs_*
-windows/BMW_Logs/*.log
-windows/BMW_Logs/Logs_*
+BMW_Logs/*
+!BMW_Logs/.gitkeep
+windows/BMW_Logs/
+*.log
 
 # Environment & IDE
 .venv/

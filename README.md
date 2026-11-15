@@ -34,7 +34,7 @@ This tool is a dedicated management, flashing, and diagnostics suite for:
    - **Session Logging**: Automatically saves a timestamped log to `BMW_Logs\session_YYYYMMDD_HHMMSS.log`.
 
 2. **One-Click Autologin Root SSH Terminal**:
-   - Automatically authenticates root access using the known EntryNav2 password `Entry0?Evo!1`.
+   - Automatically authenticates root access using default EntryNav2 head unit credentials.
    - Injects credentials via native Windows OpenSSH or PuTTY with zero manual password typing and zero heuristic-triggering binary blobs.
 
 3. **Automated Update & Flash (With Pre-Flash Snapshot & Rollback)**:
@@ -67,7 +67,7 @@ This tool is a dedicated management, flashing, and diagnostics suite for:
    - Scans Windows network adapters and verifies APIPA (`169.254.x.x`) auto-IP assignment.
    - Direct ICMP ping test to the head unit (`169.254.1.0`) with delay troubleshooting.
 
-6. **iDrive Settings & Quick Actions**:
+6. **iDrive Settings & Feature Flags**:
    - Configure vehicle model and year (`/var/local/data/AA/vehicle`).
    - Disconnect-resilient feature flag management (never wipes user settings if connection drops):
      - `autostart`: Auto-start Android Auto on iDrive boot.
@@ -76,20 +76,16 @@ This tool is a dedicated management, flashing, and diagnostics suite for:
      - `kombi-off`: Disable cluster / HUD navigation display.
      - `kombi-single-maneuver`: Single maneuver route graph for clusters that reject full graphs.
      - `gps-telephone`: Use phone's internal GPS instead of car GPS.
-   - **Start / Stop Android Auto**: Immediate daemon control buttons.
-   - **Explore /opt/aa**: Inspect installed binaries, plugins, and file permissions.
-   - **Reset App Guard**: Clear `app-guard` and `app.disable` after crash recovery.
-   - **Reboot Head Unit**: Trigger a clean head unit reboot over SSH.
-   - **Uninstall**: Completely and cleanly remove Android Auto from the car.
+   - **Uninstall**: Cleanly removes Android Auto from the car.
 
 ---
 
 ## 🚀 Quick Start on Windows
 
-### Operational Profile: Engine Running (14.2V Power)
+### Hardware & Power Setup
 - A PC running **Windows 10** (build 1809 or newer) or **Windows 11**.
 - An **ENET Cable** (OBD2 to RJ45 Ethernet) connecting the car's OBD port to your PC (or via USB-C Ethernet adapter).
-- **Engine Running**: Keep the car engine running with transmission in Park (P). The alternator delivers continuous ~14.2V power, eliminating battery discharge, sleep mode shutdowns, or BDC terminal 15 timeouts.
+- **Engine Running Recommendation**: It is recommended to keep the car engine running with transmission in Park (P) during flashing to ensure stable power and prevent battery discharge or vehicle sleep mode shutdown.
 
 ### Connecting to the Car
 1. Plug the ENET cable into the OBD2 port (driver footwell) and your PC.
@@ -99,10 +95,9 @@ This tool is a dedicated management, flashing, and diagnostics suite for:
 
 ### Launching the Tool
 
-* **Zero-Window Invisible Launch**: Double-click `Launch_Silent.vbs` to start the tool with **no PowerShell or CMD console screen visible at all**.
-* **Standard Launch**: Double-click `Launch_Windows_Tool.bat`.
-* **PowerShell WPF Native Mode**: Run `.\windows\Launch_Tool.bat --powershell` (the console window automatically hides on startup so only the GUI is displayed).
-* **Standalone Single-File EXE**: Run `windows\dist\EntryNav2_Manager.exe` (or build from source with `windows\build_exe.bat`) with zero Python prerequisites.
+* **One-Click Launch**: Double-click `Launch_Tool.bat` in the repository root (prioritizes standalone `.exe`, or launches via Python).
+* **Standalone Single-File EXE**: Run `windows\dist\EntryNav2_Manager.exe` directly with zero Python or external runtime prerequisites.
+* **Build EXE from Source**: Run `windows\build_exe.bat` to re-compile the single-file executable using PyInstaller.
 
 ---
 
@@ -110,19 +105,18 @@ This tool is a dedicated management, flashing, and diagnostics suite for:
 
 ### 1. Root SSH Shell Autologin
 1. Verify the car IP (default `169.254.1.0`).
-2. Click **"Test Connection"**. You will see the exact command sent, the response `● Connected (<firmware version>)`, and confirmation in the activity log.
-3. Click **"🚀 Open Root SSH Terminal"**.
-4. A dedicated terminal window will open, authenticate `Entry0?Evo!1` automatically, and land directly on the car's `#` root prompt!
+2. Click **"Test Connection"**. You will see the exact command sent, the response `[ Reachable: <firmware> ]`, and confirmation in the activity log.
+3. Click **"Open SSH Terminal"**.
+4. A dedicated terminal window will open, authenticate automatically, and land directly on the car's `#` root prompt!
 
 ---
 
 ### 2. Updating or Installing EntryNav2 Android Auto
-1. Open the **"Update / Flash Car"** tab.
-2. Click **"Fetch Releases from GitHub"** to load published releases, or click **"Browse Local .tar..."** if you have a local archive.
-3. Select the desired release (e.g. `v0.12.1-rc.4` or `v0.12.0`). The official **Expected SHA-256** populates automatically.
-4. *(Optional)* Enter your car model (e.g. `320d`, `X3`, `M340i`) and year (e.g. `2020`).
-5. Click **"Start Update / Flash"**.
-6. Watch the **"Live Head Unit Output Streamed & Confirmed"** terminal in real time as each step executes:
+1. Open the **"Flash & Update"** tab.
+2. Select the desired release from the dynamically populated list, or click **"Browse Local .tar..."** if you have a local archive. The official **Expected SHA-256** populates automatically.
+3. *(Optional)* Enter your car model (e.g. `320d`, `X3`, `M340i`) and year (e.g. `2020`).
+4. Click **"Start Update / Flash"**.
+5. Watch the **"Activity, Commands & In-Car Terminal Trace"** terminal in real time as each step executes:
    - Step 1: Archive SHA-256 integrity check.
    - Step 2: Car SSH pre-flight connectivity, firmware check, and 16 MB space check.
    - Step 3: RAM-disk `/tmp/` upload via SFTP/SCP with transfer rate reporting.
@@ -131,8 +125,8 @@ This tool is a dedicated management, flashing, and diagnostics suite for:
    - Step 6: Non-destructive rehearsal dry-run (`aa-supervisor --compat`).
    - Step 7: Pre-flash snapshot backup in `/tmp/aa_backup/` and atomic flash install (`mount -o remount,rw /`, copy, `sync`, remount `ro`).
    - Step 8: Post-install bit-for-bit MD5 verification against flash (with automatic rollback on mismatch).
-7. When prompted, choose **Yes** to reboot the head unit.
-8. On iDrive: Go to **Media -> Android Auto -> Start**.
+6. After installation, reboot the head unit by holding the volume rotary knob for 25–30 seconds.
+7. On iDrive: Go to **Media -> Android Auto -> Start**.
 
 ---
 
