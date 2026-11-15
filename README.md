@@ -225,4 +225,11 @@ python -m pytest tests/ -v
 
 ## 📄 License
 
-This tool is distributed under the [PolyForm Noncommercial License 1.0.0](https://github.com/Jiraiya43/EntryNav2-Android-Auto/blob/main/LICENSE.md) consistent with the EntryNav2-Android-Auto project.
+This tool suite is distributed under the [PolyForm Noncommercial License 1.0.0](LICENSE.md), directly matching and fully compatible with the upstream [EntryNav2-Android-Auto](https://github.com/Jiraiya43/EntryNav2-Android-Auto/blob/main/LICENSE.md) project.
+
+```text
+Required Notice: Copyright (c) 2026 Jiraiya43 - EntryNav2 (EntryEvo) Android Auto
+Required Notice: Copyright (c) 2026 EntryNav2 Windows Suite Contributors
+```
+
+See [LICENSE.md](LICENSE.md) for full terms.
