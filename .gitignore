@@ -1,0 +1,30 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# PyInstaller temporary build directories
+build/
+windows/build/
+
+# Testing & coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Local diagnostic logs and sessions
+BMW_Logs/*.log
+BMW_Logs/Logs_*
+windows/BMW_Logs/*.log
+windows/BMW_Logs/Logs_*
+
+# Environment & IDE
+.venv/
+env/
+venv/
+.idea/
+.vscode/
+*.swp
+*~
+.DS_Store
+Thumbs.db

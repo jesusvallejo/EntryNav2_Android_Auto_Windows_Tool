@@ -1,0 +1,4 @@
+# Optional dependencies for Python edition of EntryNav2 Manager
+# The tool automatically uses Windows built-in OpenSSH client if these are not installed.
+paramiko>=3.0.0
+requests>=2.28.0
