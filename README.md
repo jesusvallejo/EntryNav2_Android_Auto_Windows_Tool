@@ -5,7 +5,7 @@
 
 Download the standalone Windows executable directly from the **[Releases](https://github.com/jesusvallejo/EntryNav2_Android_Auto_Windows_Tool/releases/latest)** page (no Python or external prerequisites needed).
 
-A dedicated Windows suite designed specifically for the [EntryNav2-Android-Auto](https://github.com/Jiraiya43/EntryNav2-Android-Auto) project. It provides an automated update workflow with pre-flash snapshot and rollback verification, one-click autologin root SSH terminal, full command and head unit output transparency, diagnostic log extraction with real-time Wi-Fi link analysis, ENET network adapter diagnostics, and iDrive feature configuration for BMW EntryNav2 (EntryEvo) head units.
+A dedicated Windows suite designed specifically for the [EntryNav2-Android-Auto](https://github.com/Jiraiya43/EntryNav2-Android-Auto) project. It provides an update workflow with pre-flash verification, one-click autologin root SSH terminal, full command and head unit output transparency, diagnostic log extraction, ENET network adapter diagnostics, and iDrive feature configuration for BMW EntryNav2 (EntryEvo) head units.
 
 ---
 
@@ -52,28 +52,21 @@ This tool is a dedicated management, flashing, and diagnostics suite for:
    - **Dynamic Linker & Symbol Check**: Validates shared libraries and symbols with `LD_TRACE_LOADED_OBJECTS=1` before execution.
    - **Rehearsal Compatibility Check**: Runs `aa-supervisor --compat` with full environment (`XDG_RUNTIME_DIR=/run/system/0`, `WAYLAND_DISPLAY=wayland-0`) to detect `@block`, `@warn`, and `@ok` flags.
    - **Pre-Flash Snapshot Backup**: Backs up existing binaries to `/tmp/aa_backup/` before touching flash.
-   - **Atomic Write & Remount**: Remounts root `/` read-write only for the duration of the copy, creates `.installed-by-entryaad` markers, calls `sync`, and safely remounts `/` read-only.
+   - **Atomic Write & Remount**: Remounts root `/` read-write only for the duration of the copy, creates `.installed-by-entryaad` markers, calls `sync`, and remounts `/` read-only.
    - **Post-Install MD5 Verification & Automated Rollback**: Runs `md5sum -c` directly on flashed files. If any discrepancy is detected, the tool automatically restores the prior snapshot, syncs, and remounts `/` read-only.
    - **Ramdisk Cleanup**: Automatically removes temporary staging files from `/tmp`.
 
-4. **Diagnostic Logs & Wi-Fi Link Analysis**:
-   - **One-Click Enable**: Creates `/var/local/data/AA/maintenance` to activate logging.
-   - **Pull Logs**: Downloads `app.log`, `app.old.log`, `entry-aa-service.log`, `app-guard`, and `vehicle` into timestamped local folders (`BMW_Logs\Logs_YYYYMMDD_HHMMSS\`).
-   - **Wi-Fi Diagnostics Analyzer**: Automatically parses `[WifiLink]` metrics into structured diagnostics:
-     - Band (2.4 GHz vs 5 GHz) and Wi-Fi Channel
-     - Signal strength (dBm) with Quality Rating (Excellent / Good / Fair / Poor)
-     - Rx / Tx bitrates (Mbps)
-     - Retried frames & dropped packet counts
-     - Round-trip time (RTT in ms)
-     - Actionable RF health advice (e.g. phone placement, interference detection)
-   - **Clear Logs**: Purges all log files and turns off maintenance mode in one step.
+4. **Diagnostic Logs**:
+   - **One-Click Enable**: Creates `/var/local/data/AA/maintenance` on the car to activate logging.
+   - **Pull Logs**: Downloads `app.log`, `app.old.log`, `entry-aa-service.log`, `app-guard`, and `vehicle` into local timestamped folders (`BMW_Logs\Logs_YYYYMMDD_HHMMSS\`).
+   - **In-App Log Viewer**: View pulled diagnostic logs directly within the tool.
+   - **Clear Logs**: Purges all log files from flash and turns off maintenance mode in one step.
 
 5. **ENET Network & Adapter Diagnostics**:
    - Scans Windows network adapters and verifies APIPA (`169.254.x.x`) auto-IP assignment.
    - Direct ICMP ping test to the head unit (`169.254.1.0`) with delay troubleshooting.
 
 6. **iDrive Settings & Feature Flags**:
-   - Configure vehicle model and year (`/var/local/data/AA/vehicle`).
    - Disconnect-resilient feature flag management (never wipes user settings if connection drops):
      - `autostart`: Auto-start Android Auto on iDrive boot.
      - `usb`: Force USB cable mode instead of wireless.
@@ -119,9 +112,8 @@ This tool is a dedicated management, flashing, and diagnostics suite for:
 ### 2. Updating or Installing EntryNav2 Android Auto
 1. Open the **"Flash & Update"** tab.
 2. Select the desired release from the dynamically populated list, or click **"Browse Local .tar..."** if you have a local archive. The official **Expected SHA-256** populates automatically.
-3. *(Optional)* Enter your car model (e.g. `320d`, `X3`, `M340i`) and year (e.g. `2020`).
-4. Click **"Start Update / Flash"**.
-5. Watch the **"Activity, Commands & In-Car Terminal Trace"** terminal in real time as each step executes:
+3. Click **"Start Update / Flash"**.
+4. Watch the **"Activity, Commands & In-Car Terminal Trace"** terminal in real time as each step executes:
    - Step 1: Archive SHA-256 integrity check.
    - Step 2: Car SSH pre-flight connectivity, firmware check, and 16 MB space check.
    - Step 3: RAM-disk `/tmp/` upload via SFTP/SCP with transfer rate reporting.
@@ -130,29 +122,23 @@ This tool is a dedicated management, flashing, and diagnostics suite for:
    - Step 6: Non-destructive rehearsal dry-run (`aa-supervisor --compat`).
    - Step 7: Pre-flash snapshot backup in `/tmp/aa_backup/` and atomic flash install (`mount -o remount,rw /`, copy, `sync`, remount `ro`).
    - Step 8: Post-install bit-for-bit MD5 verification against flash (with automatic rollback on mismatch).
-6. After installation, reboot the head unit by holding the volume rotary knob for 25–30 seconds.
-7. On iDrive: Go to **Media -> Android Auto -> Start**.
+5. After installation, reboot the head unit by holding the volume rotary knob for 25–30 seconds.
+6. On iDrive: Go to **Media -> Android Auto -> Start**.
 
 ---
 
-### 3. Collecting and Analyzing Diagnostic Logs
-If you encounter any issues (connection dropouts, Wi-Fi stutter, or crashing):
-1. In the **"Diagnostic Logs"** tab, check the **Car Maintenance Logging Status** banner:
+### 3. Collecting and Reviewing Diagnostic Logs
+If you encounter any issues and need to inspect head unit logs:
+1. In the **"Diagnostic Logs"** tab, check the **Head Unit Maintenance Logging** status banner:
    - `Logging: ENABLED (/var/local/data/AA/maintenance active)` (Green)
    - `Logging: DISABLED (Normal mode - no logs written)` (Red / Gray)
    - `Logging: Offline / Unreachable` (if head unit is unreachable)
-2. Click **"Enable Maintenance Logging"** to begin recording logs.
+2. Click **"Enable Maintenance Logging"** to begin recording logs on the car.
 3. Reproduce the problem in your car (start Android Auto or connect your phone).
 4. Click **"Pull Logs to Local PC"**.
 5. The tool downloads all logs into a timestamped directory (`BMW_Logs\Logs_YYYYMMDD_HHMMSS\`).
-6. Review the **Wi-Fi Link Diagnostic Analysis Card**:
-   - Signal dBm and Quality Rating (Excellent / Good / Fair / Poor)
-   - Frequency band (2.4 GHz vs 5 GHz) and channel
-   - Bitrates (Rx/Tx Mbps)
-   - Frame retries and packet loss metrics
-   - Diagnostic insights and recommendations
-7. Review raw logs in the embedded log viewer or click **"Open Logs Folder"**.
-8. Once finished diagnosing, click **"Disable & Clear Logs"** to stop logging and purge files from flash.
+6. Review raw logs directly in the embedded log viewer or click **"Open Logs Folder"** to inspect files in your file manager.
+7. Once finished diagnosing, click **"Disable & Clear Logs"** to stop logging and purge files from flash.
 
 ---
 
@@ -173,17 +159,14 @@ python windows\entrynav2_tool.py --ip 169.254.1.0 --check
 # Launch interactive root shell with autologin
 python windows\entrynav2_tool.py --ip 169.254.1.0 --shell
 
-# Reboot head unit over SSH
-python windows\entrynav2_tool.py --ip 169.254.1.0 --reboot
-
 # Flash update with SHA-256 verification
-python windows\entrynav2_tool.py --ip 169.254.1.0 --update entrynav2-android-auto-0.12.1-rc.4-armhf.tar --sha256 <hash> --model 320d --year 2020
+python windows\entrynav2_tool.py --ip 169.254.1.0 --update entrynav2-android-auto-0.12.1-rc.4-armhf.tar --sha256 <hash>
 
 # Enable diagnostic logging
 python windows\entrynav2_tool.py --ip 169.254.1.0 --enable-logs
 
-# Pull logs to local folder and analyze Wi-Fi link
-python windows\entrynav2_tool.py --ip 169.254.1.0 --pull-logs --wifi-diag
+# Pull logs to local folder
+python windows\entrynav2_tool.py --ip 169.254.1.0 --pull-logs
 
 # Disable and clear logs
 python windows\entrynav2_tool.py --ip 169.254.1.0 --disable-logs
