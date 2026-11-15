@@ -506,7 +506,7 @@ Write-Host '================================================================' -F
 
                         <Border Background="#21262D" CornerRadius="6" Padding="14" BorderBrush="#30363D" BorderThickness="1">
                             <StackPanel>
-                                <TextBlock Text="Step 3: Verification &amp; In-Car Safety Standards" FontSize="14" FontWeight="Bold" Foreground="#58A6FF" Margin="0,0,0,4"/>
+                                <TextBlock Text="Step 3: Verification &amp; Installation Procedure" FontSize="14" FontWeight="Bold" Foreground="#58A6FF" Margin="0,0,0,4"/>
                                 <TextBlock Text="Enforces local SHA-256 validation, car storage check (&gt;= 16MB), RAM-disk /tmp upload, in-car MD5 verification, dynamic linker resolution check, and rehearsal dry-run (aa-supervisor --compat) before touching flash." TextWrapping="Wrap" Foreground="#8B949E" Margin="0,0,0,12"/>
                                 <Grid>
                                     <Grid.ColumnDefinitions>
@@ -514,7 +514,7 @@ Write-Host '================================================================' -F
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
-                                    <Button Name="btnStartUpdate" Content="⚡ EXECUTE SAFE UPDATE &amp; FLASH" Height="36" FontSize="13" Background="#238636" HorizontalAlignment="Left" Padding="20,6"/>
+                                    <Button Name="btnStartUpdate" Content="EXECUTE UPDATE &amp; FLASH" Height="36" FontSize="13" Background="#238636" HorizontalAlignment="Left" Padding="20,6"/>
                                     <ProgressBar Name="pbFlashProgress" Grid.Column="1" Height="22" Margin="14,0" Minimum="0" Maximum="8" Value="0" Background="#0D1117" Foreground="#238636" BorderBrush="#30363D"/>
                                     <TextBlock Name="lblFlashStep" Grid.Column="2" Text="Ready" VerticalAlignment="Center" FontWeight="Bold" Foreground="#8B949E"/>
                                 </Grid>
@@ -607,14 +607,14 @@ Write-Host '================================================================' -F
             </TabItem>
         </TabControl>
 
-        <!-- BOTTOM ACTIVITY & SAFETY LOG CONSOLE -->
+        <!-- BOTTOM ACTIVITY & TERMINAL LOG CONSOLE -->
         <Border Grid.Row="2" Background="#0D1117" CornerRadius="6" Padding="8" Margin="0,10,0,0" BorderBrush="#30363D" BorderThickness="1">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                <TextBlock Text="Activity, Commands &amp; Safety Verification Log:" FontSize="11" FontWeight="Bold" Foreground="#58A6FF" Margin="4,0,0,4"/>
+                <TextBlock Text="Activity, Commands &amp; Terminal Log:" FontSize="11" FontWeight="Bold" Foreground="#58A6FF" Margin="4,0,0,4"/>
                 <TextBox Name="txtConsoleLog" Grid.Row="1" Background="#0D1117" Foreground="#3FB950" BorderThickness="0" FontFamily="Consolas" FontSize="11" IsReadOnly="True" VerticalScrollBarVisibility="Auto"/>
             </Grid>
         </Border>
@@ -1036,7 +1036,7 @@ $btnBrowseLocal.Add_Click({
     }
 })
 
-# ----------------- EVENT: START SAFE UPDATE / FLASH -----------------
+# ----------------- EVENT: START UPDATE / FLASH -----------------
 $btnStartUpdate.Add_Click({
     $targetIP = $txtCarIP.Text.Trim()
     $targetPort = [int]$txtPort.Text.Trim()
@@ -1049,7 +1049,7 @@ $btnStartUpdate.Add_Click({
         return
     }
 
-    $confirm = [System.Windows.MessageBox]::Show("Are you sure you want to update/flash EntryNav2 Android Auto?`n`nEnsure car ignition is ON and parked.", "Confirm Flash", [System.Windows.MessageBoxButton]::YesNo, [System.Windows.MessageBoxImage]::Question)
+    $confirm = [System.Windows.MessageBox]::Show("DISCLAIMER: Modifying vehicle head unit software carries inherent risk. You proceed entirely at your own risk and responsibility.`n`nRecommendation: Keep car engine running during update.`n`nAre you sure you want to proceed with flashing EntryNav2 Android Auto?", "Confirm Update", [System.Windows.MessageBoxButton]::YesNo, [System.Windows.MessageBoxImage]::Warning)
     if ($confirm -ne [System.Windows.MessageBoxResult]::Yes) { return }
 
     $btnStartUpdate.IsEnabled = $false
@@ -1057,7 +1057,7 @@ $btnStartUpdate.Add_Click({
 
     try {
         Write-GuiLog "=========================================================="
-        Write-GuiLog "🚀 INITIATING SAFE ENTRYNAV2 FLASH PROCEDURE"
+        Write-GuiLog "INITIATING ENTRYNAV2 FLASH PROCEDURE"
         Write-GuiLog "=========================================================="
 
         $selectedItem = [string]$cmbReleases.SelectedItem

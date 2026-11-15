@@ -456,7 +456,7 @@ def run_gui():
 
     console_txt = scrolledtext.ScrolledText(
         log_panel,
-        height=8,
+        height=7,
         bg="#05080A",
         fg="#E6EDF3",
         insertbackground=COLOR_LIGHT_BLUE,
@@ -465,6 +465,14 @@ def run_gui():
         bd=0,
     )
     console_txt.pack(fill="x", expand=True)
+
+    tk.Label(
+        log_panel,
+        text="DISCLAIMER: Modifying vehicle head unit flash carries inherent risk. All actions are taken entirely at your own risk and responsibility. No warranty is provided.",
+        bg=BG_PANEL,
+        fg=COLOR_AMBER,
+        font=("Segoe UI", 8),
+    ).pack(fill="x", pady=(4, 0))
 
     def setup_text_tags(txt):
         txt.tag_configure("ts", foreground="#6E7681", font=("Consolas", 9))
@@ -548,7 +556,7 @@ def run_gui():
     create_btn(state_card, "Refresh State", lambda: retrieve_installed_version_action(show_dialog=False), bg=BG_CARD, fg=FG_TEXT, hover_bg="#2D333B", font=("Segoe UI", 8), padx=8, pady=2).pack(side="right")
 
     # Step 1: Release Archive Selection
-    rel_card = create_card(up_container, "Select Release Archive", "Dynamic GitHub Releases Feed")
+    rel_card = create_card(up_container, "Select Release Archive")
     rel_ctrl_frame = tk.Frame(rel_card, bg=BG_PANEL)
     rel_ctrl_frame.pack(fill="x", pady=4)
 
@@ -648,7 +656,7 @@ def run_gui():
 
         confirm = messagebox.askyesno(
             "Confirm Flash / Update",
-            "Notice: It is recommended to have the car engine running during flashing to ensure stable power.\n\nDo you want to proceed with installing this update?",
+            "DISCLAIMER: Modifying vehicle head unit software carries inherent risk. You proceed entirely at your own risk and responsibility.\n\nRecommendation: Keep the car engine running during flashing to ensure stable power.\n\nDo you want to proceed with installing this update?",
         )
         if not confirm:
             return
@@ -656,7 +664,7 @@ def run_gui():
         idx = rel_combobox.current()
         local_path = local_tar_path_var.get()
         flash_btn.configure(state="disabled")
-        set_flash_progress(0, "Starting safe update...")
+        set_flash_progress(0, "Starting update...")
 
         def _flash_thread():
             try:
@@ -722,7 +730,7 @@ def run_gui():
                     set_flash_progress(0, "Failed: Aborted")
                     messagebox.showerror(
                         "Installation Aborted",
-                        "Safety checks prevented installation or verification failed. Previous head unit state was preserved.",
+                        "Pre-installation checks or verification failed. Previous head unit state was preserved.",
                     )
             finally:
                 root.after(0, lambda: flash_btn.configure(state="normal"))
@@ -742,7 +750,7 @@ def run_gui():
 
     flash_btn = create_btn(
         flash_bar_row,
-        "Start Safe Update / Flash",
+        "Start Update / Flash",
         start_flashing,
         bg=COLOR_GREEN,
         hover_bg="#2EA043",
@@ -805,7 +813,7 @@ def run_gui():
     set_container = tk.Frame(tab_settings, bg=BG_DARK, padx=8, pady=8)
     set_container.pack(fill="both", expand=True)
 
-    flags_card = create_card(set_container, "iDrive Configuration Flags", "Saved in /var/local/data/AA (Disconnect-Safe)", fill="both")
+    flags_card = create_card(set_container, "iDrive Configuration Flags", "Saved in /var/local/data/AA", fill="both")
     flags_dict = {key: tk.BooleanVar(value=False) for key in SUPPORTED_FLAGS}
 
     flags_grid = tk.Frame(flags_card, bg=BG_PANEL)
@@ -868,7 +876,7 @@ def run_gui():
     def on_uninstall():
         if messagebox.askyesno(
             "Confirm Uninstall",
-            "Are you sure you want to completely uninstall EntryNav2 Android Auto from the car?\n\nThis removes /opt/aa, plugins, and configuration flags.",
+            "DISCLAIMER: Modifying vehicle head unit software carries inherent risk. You proceed entirely at your own risk and responsibility.\n\nAre you sure you want to completely uninstall EntryNav2 Android Auto from the car?\n\nThis removes /opt/aa, plugins, and configuration flags.",
         ):
             def _worker():
                 GLOBAL_LOGGER.log("WARN", "Removing Android Auto from head unit...")

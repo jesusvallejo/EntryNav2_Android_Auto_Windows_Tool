@@ -1,6 +1,11 @@
 # BMW EntryNav2 Android Auto - Windows Management & Flashing Suite v2.0
 
-A dedicated Windows suite designed specifically for the [EntryNav2-Android-Auto](https://github.com/Jiraiya43/EntryNav2-Android-Auto) project. It provides automated safe updates with rollback protection, one-click autologin root SSH terminal, full command and head unit output transparency, diagnostic log extraction with real-time Wi-Fi link analysis, ENET network adapter diagnostics, and iDrive feature configuration for BMW EntryNav2 (EntryEvo) head units.
+A dedicated Windows suite designed specifically for the [EntryNav2-Android-Auto](https://github.com/Jiraiya43/EntryNav2-Android-Auto) project. It provides an automated update workflow with pre-flash snapshot and rollback verification, one-click autologin root SSH terminal, full command and head unit output transparency, diagnostic log extraction with real-time Wi-Fi link analysis, ENET network adapter diagnostics, and iDrive feature configuration for BMW EntryNav2 (EntryEvo) head units.
+
+---
+
+> [!WARNING]
+> **DISCLAIMER & LIMITATION OF LIABILITY**: Modifying vehicle head unit software carries inherent risk. You use this software **entirely at your own risk and responsibility**. The authors and contributors assume no liability for any damage, malfunction, bricked hardware, loss of data, or vehicle warranty issues.
 
 ---
 
@@ -32,7 +37,7 @@ This tool is a dedicated management, flashing, and diagnostics suite for:
    - Automatically authenticates root access using the known EntryNav2 password `Entry0?Evo!1`.
    - Injects credentials via native Windows OpenSSH or PuTTY with zero manual password typing and zero heuristic-triggering binary blobs.
 
-3. **Automated Safe Update & Flash (With Pre-Flash Snapshot & Rollback)**:
+3. **Automated Update & Flash (With Pre-Flash Snapshot & Rollback)**:
    - **Release Catalogue**: Built-in support for official releases (including `v0.12.1-rc.4`, `v0.12.1-rc.3`, `v0.12.0`), GitHub API release fetching, and local custom `.tar` archives.
    - **Pre-Transfer SHA-256 Check**: Computes and validates the local archive against official `.sha256` digests before touching the car.
    - **Flash Storage Pre-check**: Checks `df -k /` on the head unit with robust multi-line parsing and requires $\ge 16\text{ MB}$ free.
@@ -64,7 +69,7 @@ This tool is a dedicated management, flashing, and diagnostics suite for:
 
 6. **iDrive Settings & Quick Actions**:
    - Configure vehicle model and year (`/var/local/data/AA/vehicle`).
-   - Disconnect-safe feature flag management (never wipes user settings if connection drops):
+   - Disconnect-resilient feature flag management (never wipes user settings if connection drops):
      - `autostart`: Auto-start Android Auto on iDrive boot.
      - `usb`: Force USB cable mode instead of wireless.
      - `entry-direct`: Launch directly without sub-menu.
@@ -75,7 +80,7 @@ This tool is a dedicated management, flashing, and diagnostics suite for:
    - **Explore /opt/aa**: Inspect installed binaries, plugins, and file permissions.
    - **Reset App Guard**: Clear `app-guard` and `app.disable` after crash recovery.
    - **Reboot Head Unit**: Trigger a clean head unit reboot over SSH.
-   - **Safe Uninstall**: Completely and cleanly remove Android Auto from the car.
+   - **Uninstall**: Completely and cleanly remove Android Auto from the car.
 
 ---
 
@@ -116,7 +121,7 @@ This tool is a dedicated management, flashing, and diagnostics suite for:
 2. Click **"Fetch Releases from GitHub"** to load published releases, or click **"Browse Local .tar..."** if you have a local archive.
 3. Select the desired release (e.g. `v0.12.1-rc.4` or `v0.12.0`). The official **Expected SHA-256** populates automatically.
 4. *(Optional)* Enter your car model (e.g. `320d`, `X3`, `M340i`) and year (e.g. `2020`).
-5. Click **"⚡ START SAFE FLASH / UPDATE"**.
+5. Click **"Start Update / Flash"**.
 6. Watch the **"Live Head Unit Output Streamed & Confirmed"** terminal in real time as each step executes:
    - Step 1: Archive SHA-256 integrity check.
    - Step 2: Car SSH pre-flight connectivity, firmware check, and 16 MB space check.
@@ -172,7 +177,7 @@ python windows\entrynav2_tool.py --ip 169.254.1.0 --shell
 # Reboot head unit over SSH
 python windows\entrynav2_tool.py --ip 169.254.1.0 --reboot
 
-# Safe flash with strict SHA-256 enforcement
+# Flash update with SHA-256 verification
 python windows\entrynav2_tool.py --ip 169.254.1.0 --update entrynav2-android-auto-0.12.1-rc.4-armhf.tar --sha256 <hash> --model 320d --year 2020
 
 # Enable diagnostic logging
@@ -190,21 +195,21 @@ python windows\entrynav2_tool.py --ip 169.254.1.0 --net-check
 
 ---
 
-## 🔒 Automotive Safety & Failsafe Architecture
+## ⚙️ Technical Architecture & Verification Checks
 
-| Safety Standard | Implementation |
+| Check | Implementation |
 |---|---|
-| **Engine Running Power Rail** | Standard operating profile with engine running guarantees constant ~14.2V alternator rail. |
+| **Engine Running Recommendation** | Recommendation to keep engine running during updates to maintain stable power rail. |
 | **Local Digest Validation** | Validates SHA-256 locally before transfer. Aborts immediately on mismatch. |
 | **Flash Wear Prevention** | Archive transfers strictly to in-memory `/tmp` tmpfs ramdisk. |
 | **Storage Protection** | Verifies root `/` has $\ge 16\text{ MB}$ free with robust multi-line BusyBox parsing. |
-| **Clean Process Safety** | Stops running `aa-supervisor` or `entry-aad` with graceful `SIGTERM` followed by `SIGKILL`. |
+| **Process Termination** | Stops running `aa-supervisor` or `entry-aad` with graceful `SIGTERM` followed by `SIGKILL`. |
 | **Library Verification** | Checks symbol resolution using the car's dynamic linker `/lib/ld-linux-armhf.so.3` before flashing. |
 | **Dry-Run Compatibility** | Executes `aa-supervisor --compat`. If any `@block` issue is reported, installation halts. |
 | **Pre-Flash Snapshot** | Backs up existing `/opt/aa` and plugins to `/tmp/aa_backup/` before touching flash. |
 | **Read-Only Flash System** | Root filesystem `/` remains read-only at all times except during the exact seconds of file copying. |
-| **Post-Write Validation & Rollback** | Runs `md5sum -c` directly on flash. Automatically restores previous snapshot if verification fails. |
-| **Crash Guard** | If iDrive crashes 3 times within 2 minutes of app load, head unit disables the plugin (`app-guard`). Reset with 1 click. |
+| **Post-Write Validation & Rollback** | Runs `md5sum -c` directly on flash. Restores previous snapshot if verification fails. |
+| **Crash Guard** | If iDrive crashes 3 times within 2 minutes of app load, head unit disables the plugin (`app-guard`). |
 
 ---
 

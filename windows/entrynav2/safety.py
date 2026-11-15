@@ -1,6 +1,6 @@
 # Copyright (c) 2026 Jiraiya43 / EntryNav2 Community
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
-"""Automotive safety workflows, flash integrity checks, and automated rollback protection."""
+"""Automotive installation workflows, flash integrity checks, and rollback protection."""
 
 import os
 import re
@@ -14,7 +14,7 @@ from .transport import SSHClientWrapper
 
 
 class SafetyWorkflow:
-    """Implements strict automotive safety standards and flash rollback mechanisms."""
+    """Implements pre-flash verification and rollback mechanisms."""
 
     def __init__(self, ssh: SSHClientWrapper, log_callback=None):
         self.ssh = ssh
@@ -198,7 +198,7 @@ class SafetyWorkflow:
             results["is_running"] = True
             self.log("WARN", f"⚠️ Android Auto is currently running (PID {out.strip()}).")
             if auto_stop_aa:
-                self.log("INFO", "Safely stopping active Android Auto processes before proceeding...")
+                self.log("INFO", "Stopping active Android Auto processes before proceeding...")
                 # Graceful SIGTERM first
                 self.ssh.run_command("killall aa-supervisor entry-aad 2>/dev/null")
                 time.sleep(1.0)
@@ -226,7 +226,7 @@ class SafetyWorkflow:
         vehicle_model: str = "",
         vehicle_year: str = ""
     ) -> bool:
-        """Execute full 8-step safe installation with pre-flash snapshot and automated rollback."""
+        """Execute full 8-step installation with pre-flash snapshot and automated rollback."""
         tar_name = Path(local_tar_path).name
         self.log("STEP", "==========================================================")
         self.log("STEP", "🚀 STARTING ENTRYNAV2 ANDROID AUTO UPDATE / INSTALL")
@@ -329,7 +329,7 @@ export HOME=/tmp && \\
             self.log("ERROR", "❌ Compatibility check detected blocking issues! Cannot install on this unit.")
             return False
         if "@warn" in out:
-            self.log("WARN", "⚠️ Compatibility check reported non-fatal warnings (safe to proceed).")
+            self.log("WARN", "⚠️ Compatibility check reported non-fatal warnings.")
         self.log("OK", "✅ Compatibility check passed successfully.")
 
         # 7. Pre-flash snapshot backup & Atomic Flash Installation
