@@ -1,5 +1,10 @@
 # BMW EntryNav2 Android Auto - Windows Management & Flashing Suite v2.0
 
+[![GitHub Release](https://img.shields.io/github/v/release/jesusvallejo/EntryNav2_Android_Auto_Windows_Tool?color=blue&label=Latest%20Release)](https://github.com/jesusvallejo/EntryNav2_Android_Auto_Windows_Tool/releases/latest)
+[![License](https://img.shields.io/badge/License-PolyForm%20Noncommercial-blue.svg)](LICENSE.md)
+
+Download the standalone Windows executable directly from the **[Releases](https://github.com/jesusvallejo/EntryNav2_Android_Auto_Windows_Tool/releases/latest)** page (no Python or external prerequisites needed).
+
 A dedicated Windows suite designed specifically for the [EntryNav2-Android-Auto](https://github.com/Jiraiya43/EntryNav2-Android-Auto) project. It provides an automated update workflow with pre-flash snapshot and rollback verification, one-click autologin root SSH terminal, full command and head unit output transparency, diagnostic log extraction with real-time Wi-Fi link analysis, ENET network adapter diagnostics, and iDrive feature configuration for BMW EntryNav2 (EntryEvo) head units.
 
 ---
@@ -95,8 +100,8 @@ This tool is a dedicated management, flashing, and diagnostics suite for:
 
 ### Launching the Tool
 
+* **Download Standalone EXE**: Get `EntryNav2_Manager.exe` from the **[Releases](https://github.com/jesusvallejo/EntryNav2_Android_Auto_Windows_Tool/releases/latest)** page and double-click to launch with zero Python or library installation.
 * **One-Click Launch**: Double-click `Launch_Tool.bat` in the repository root (prioritizes standalone `.exe`, or launches via Python).
-* **Standalone Single-File EXE**: Run `windows\dist\EntryNav2_Manager.exe` directly with zero Python or external runtime prerequisites.
 * **Build EXE from Source**: Run `windows\build_exe.bat` to re-compile the single-file executable using PyInstaller.
 
 ---
@@ -132,13 +137,13 @@ This tool is a dedicated management, flashing, and diagnostics suite for:
 
 ### 3. Collecting and Analyzing Diagnostic Logs
 If you encounter any issues (connection dropouts, Wi-Fi stutter, or crashing):
-1. In the **"Diagnostic Logs & Wi-Fi"** tab, check the **Car Maintenance Logging Status** banner:
-   - `● Logging: ENABLED (/var/local/data/AA/maintenance active)` (Green)
-   - `○ Logging: DISABLED (Normal mode - no logs written)` (Red / Gray)
-   - `● Logging: Offline / Unreachable` (if head unit is unreachable)
-2. Click **"✅ Enable Maintenance Logging"** to begin recording logs.
+1. In the **"Diagnostic Logs"** tab, check the **Car Maintenance Logging Status** banner:
+   - `Logging: ENABLED (/var/local/data/AA/maintenance active)` (Green)
+   - `Logging: DISABLED (Normal mode - no logs written)` (Red / Gray)
+   - `Logging: Offline / Unreachable` (if head unit is unreachable)
+2. Click **"Enable Maintenance Logging"** to begin recording logs.
 3. Reproduce the problem in your car (start Android Auto or connect your phone).
-4. Click **"📥 Pull Logs to PC"**.
+4. Click **"Pull Logs to Local PC"**.
 5. The tool downloads all logs into a timestamped directory (`BMW_Logs\Logs_YYYYMMDD_HHMMSS\`).
 6. Review the **Wi-Fi Link Diagnostic Analysis Card**:
    - Signal dBm and Quality Rating (Excellent / Good / Fair / Poor)
@@ -146,8 +151,8 @@ If you encounter any issues (connection dropouts, Wi-Fi stutter, or crashing):
    - Bitrates (Rx/Tx Mbps)
    - Frame retries and packet loss metrics
    - Diagnostic insights and recommendations
-7. Review raw logs in the embedded log viewer or click **"📂 Open Logs Folder"**.
-8. Once finished diagnosing, click **"❌ Disable & Clear Logs"** to stop logging and purge files from flash.
+7. Review raw logs in the embedded log viewer or click **"Open Logs Folder"**.
+8. Once finished diagnosing, click **"Disable & Clear Logs"** to stop logging and purge files from flash.
 
 ---
 

@@ -1,0 +1,36 @@
+name: Publish Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  publish-release:
+    name: Publish GitHub Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Calculate SHA-256 Digest
+        id: checksum
+        run: |
+          sha256sum windows/dist/EntryNav2_Manager.exe > windows/dist/EntryNav2_Manager.exe.sha256
+          cat windows/dist/EntryNav2_Manager.exe.sha256
+
+      - name: Create Release and Upload Assets
+        uses: softprops/action-gh-release@v2
+        with:
+          name: BMW EntryNav2 Android Auto Windows Suite ${{ github.ref_name }}
+          files: |
+            windows/dist/EntryNav2_Manager.exe
+            windows/dist/EntryNav2_Manager.exe.sha256
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
