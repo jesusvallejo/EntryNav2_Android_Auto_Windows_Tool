@@ -1,6 +1,6 @@
 # Copyright (c) 2026 Jiraiya43 / EntryNav2 Community
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
-"""Modernized High-DPI BMW M-Sport Dark Theme GUI for EntryNav2 Windows Suite."""
+"""Clean, focused, modern High-DPI GUI for BMW EntryNav2 Windows Suite."""
 
 import os
 import platform
@@ -15,7 +15,7 @@ from datetime import datetime
 from pathlib import Path
 
 from ..config import CarConfigManager, SUPPORTED_FLAGS
-from ..diagnostics import LogManager, WifiAnalyzer
+from ..diagnostics import LogManager
 from ..network import NetworkDiagnostics
 from ..releases import ReleaseManager, BUILTIN_RELEASES, UPSTREAM_URL, DEFAULT_REPO
 from ..safety import SafetyWorkflow
@@ -33,7 +33,7 @@ def run_gui():
     import tkinter as tk
     from tkinter import filedialog, messagebox, scrolledtext, ttk
 
-    # Enable High-DPI awareness on Windows to prevent blurry rendering on high-res laptop displays
+    # Enable High-DPI awareness on Windows to prevent blurry rendering
     if platform.system() == "Windows":
         try:
             import ctypes
@@ -53,11 +53,11 @@ def run_gui():
             pass
 
     root = tk.Tk()
-    root.title("BMW EntryNav2 Android Auto - Management & Flashing Suite v2.0")
-    root.geometry("1140x840")
-    root.minsize(980, 700)
+    root.title("BMW EntryNav2 Android Auto - Windows Suite v2.0")
+    root.geometry("1100x800")
+    root.minsize(940, 660)
 
-    # BMW M-Sport Modern Dark Theme Palette
+    # Clean Dark Palette
     BG_DARK = "#0D1117"
     BG_PANEL = "#161B22"
     BG_CARD = "#21262D"
@@ -66,16 +66,12 @@ def run_gui():
     BORDER_ACTIVE = "#58A6FF"
     FG_TEXT = "#F0F6FC"
     FG_MUTED = "#8B949E"
-    BMW_BLUE = "#1F6FEB"
-    BMW_LIGHT_BLUE = "#58A6FF"
-    BMW_M_CYAN = "#0099FF"
-    BMW_M_NAVY = "#002080"
-    BMW_M_RED = "#E60000"
-    ACCENT_GREEN = "#238636"
-    ACCENT_GREEN_BRIGHT = "#3FB950"
-    ACCENT_RED = "#DA3633"
-    ACCENT_PURPLE = "#8957E5"
-    ACCENT_AMBER = "#D29922"
+    COLOR_BLUE = "#1F6FEB"
+    COLOR_LIGHT_BLUE = "#58A6FF"
+    COLOR_GREEN = "#238636"
+    COLOR_GREEN_BRIGHT = "#3FB950"
+    COLOR_RED = "#DA3633"
+    COLOR_AMBER = "#D29922"
 
     root.configure(bg=BG_DARK)
 
@@ -94,7 +90,7 @@ def run_gui():
     )
     style.map(
         "TNotebook.Tab",
-        background=[("selected", BMW_BLUE), ("active", BG_CARD)],
+        background=[("selected", COLOR_BLUE), ("active", BG_CARD)],
         foreground=[("selected", "#FFFFFF"), ("active", "#FFFFFF")],
     )
     style.configure("TFrame", background=BG_DARK)
@@ -103,12 +99,10 @@ def run_gui():
     style.configure("TLabel", background=BG_DARK, foreground=FG_TEXT, font=("Segoe UI", 9))
     style.configure("Panel.TLabel", background=BG_PANEL, foreground=FG_TEXT, font=("Segoe UI", 9))
     style.configure("Card.TLabel", background=BG_CARD, foreground=FG_TEXT, font=("Segoe UI", 9))
-    style.configure("Title.TLabel", background=BG_PANEL, foreground=BMW_LIGHT_BLUE, font=("Segoe UI", 10, "bold"))
-    style.configure("Header.TLabel", background=BG_PANEL, foreground=FG_TEXT, font=("Segoe UI", 11, "bold"))
 
     style.configure(
         "Horizontal.TProgressbar",
-        background=ACCENT_GREEN_BRIGHT,
+        background=COLOR_GREEN_BRIGHT,
         troughcolor=BG_INPUT,
         borderwidth=0,
         thickness=8,
@@ -125,12 +119,12 @@ def run_gui():
     )
     style.map("TCombobox", fieldbackground=[("readonly", BG_INPUT)], foreground=[("readonly", FG_TEXT)])
 
-    # Helper: Modern Flat Button with Interactive Hover
+    # Helper: Flat Button with Hover Effect (100% text-based, no broken emoji glyphs)
     def create_btn(
         parent,
         text,
         command,
-        bg=BMW_BLUE,
+        bg=COLOR_BLUE,
         fg="#FFFFFF",
         hover_bg=None,
         font=("Segoe UI", 9, "bold"),
@@ -139,7 +133,7 @@ def run_gui():
         cursor="hand2",
     ):
         if hover_bg is None:
-            hover_bg = BMW_LIGHT_BLUE if bg == BMW_BLUE else "#388BFD"
+            hover_bg = COLOR_LIGHT_BLUE if bg == COLOR_BLUE else "#388BFD"
         btn = tk.Button(
             parent,
             text=text,
@@ -160,7 +154,7 @@ def run_gui():
         btn.bind("<Leave>", lambda e: btn.configure(bg=bg) if str(btn["state"]) != "disabled" else None)
         return btn
 
-    # Helper: Modern Card Container with Accent Border
+    # Helper: Card Frame with Subtle Border
     def create_card(parent, title=None, subtitle=None, fill="x", padx=12, pady=10, pady_outer=4):
         card = tk.Frame(
             parent,
@@ -176,7 +170,7 @@ def run_gui():
             hdr = tk.Frame(card, bg=BG_PANEL)
             hdr.pack(fill="x", pady=(0, 6))
             if title:
-                tk.Label(hdr, text=title, bg=BG_PANEL, fg=BMW_LIGHT_BLUE, font=("Segoe UI", 10, "bold")).pack(
+                tk.Label(hdr, text=title, bg=BG_PANEL, fg=COLOR_LIGHT_BLUE, font=("Segoe UI", 10, "bold")).pack(
                     side="left"
                 )
             if subtitle:
@@ -185,33 +179,17 @@ def run_gui():
                 )
         return card
 
-    # ---------------- 1. BMW M-SPORT ACCENT STRIPES ----------------
-    stripe_canvas = tk.Canvas(root, height=3, bg=BG_DARK, highlightthickness=0)
-    stripe_canvas.pack(fill="x", side="top")
-
-    def draw_stripes(event=None):
-        w = max(stripe_canvas.winfo_width(), 1000)
-        stripe_canvas.delete("all")
-        stripe_w = min(180, w // 4)
-        s_part = stripe_w // 3
-        stripe_canvas.create_rectangle(0, 0, s_part, 3, fill=BMW_M_CYAN, width=0)
-        stripe_canvas.create_rectangle(s_part, 0, s_part * 2, 3, fill=BMW_M_NAVY, width=0)
-        stripe_canvas.create_rectangle(s_part * 2, 0, stripe_w, 3, fill=BMW_M_RED, width=0)
-        stripe_canvas.create_rectangle(stripe_w, 0, w, 3, fill=BORDER_COLOR, width=0)
-
-    stripe_canvas.bind("<Configure>", draw_stripes)
-
-    # ---------------- 2. TOP HEADER BRANDING & STATUS BAR ----------------
+    # ---------------- 1. TOP TITLE & UPSTREAM BAR ----------------
     top_header = tk.Frame(root, bg=BG_PANEL, padx=16, pady=8, highlightbackground=BORDER_COLOR, highlightthickness=1)
     top_header.pack(fill="x", padx=12, pady=(8, 4))
 
-    # Left: Brand & Badges
+    # Left: Brand & Version
     brand_frame = tk.Frame(top_header, bg=BG_PANEL)
     brand_frame.pack(side="left")
 
     tk.Label(
         brand_frame,
-        text="⚡ BMW EntryNav2 Android Auto",
+        text="BMW EntryNav2 Android Auto",
         bg=BG_PANEL,
         fg=FG_TEXT,
         font=("Segoe UI", 12, "bold"),
@@ -219,36 +197,25 @@ def run_gui():
 
     version_pill = tk.Label(
         brand_frame,
-        text=" v2.0 MODERN ",
+        text=" v2.0 ",
         bg=BG_CARD,
-        fg=BMW_LIGHT_BLUE,
+        fg=COLOR_LIGHT_BLUE,
         font=("Segoe UI", 8, "bold"),
         padx=6,
         pady=2,
     )
     version_pill.pack(side="left", padx=8)
 
-    power_pill = tk.Label(
-        brand_frame,
-        text=" ⚡ Engine Running (14.2V) ",
-        bg="#1C2E20",
-        fg=ACCENT_GREEN_BRIGHT,
-        font=("Segoe UI", 8, "bold"),
-        padx=6,
-        pady=2,
-    )
-    power_pill.pack(side="left", padx=2)
-
-    # Right: Upstream Repo Badge & Dynamic Status Indicators
-    status_header_frame = tk.Frame(top_header, bg=BG_PANEL)
-    status_header_frame.pack(side="right")
+    # Right: Upstream Link & Status Indicators
+    header_right = tk.Frame(top_header, bg=BG_PANEL)
+    header_right.pack(side="right")
 
     upstream_btn = create_btn(
-        status_header_frame,
-        text=f"⭐ {DEFAULT_REPO}",
+        header_right,
+        text=f"Upstream: {DEFAULT_REPO}",
         command=lambda: webbrowser.open(UPSTREAM_URL),
         bg=BG_CARD,
-        fg=BMW_LIGHT_BLUE,
+        fg=COLOR_LIGHT_BLUE,
         hover_bg="#2D333B",
         font=("Segoe UI", 8, "bold"),
         padx=8,
@@ -257,8 +224,8 @@ def run_gui():
     upstream_btn.pack(side="left", padx=6)
 
     status_pill = tk.Label(
-        status_header_frame,
-        text=" ● Not Checked ",
+        header_right,
+        text=" Head Unit: Not Checked ",
         bg=BG_CARD,
         fg=FG_MUTED,
         font=("Segoe UI", 9, "bold"),
@@ -268,8 +235,8 @@ def run_gui():
     status_pill.pack(side="left", padx=4)
 
     aa_badge_pill = tk.Label(
-        status_header_frame,
-        text=" AA: ● Not Checked ",
+        header_right,
+        text=" AA: Not Checked ",
         bg=BG_CARD,
         fg=FG_MUTED,
         font=("Segoe UI", 9, "bold"),
@@ -278,18 +245,17 @@ def run_gui():
     )
     aa_badge_pill.pack(side="left", padx=4)
 
-    # ---------------- 3. QUICK CONNECTION DECK ----------------
+    # ---------------- 2. CONNECTION PARAMETERS CARD ----------------
     conn_card = tk.Frame(root, bg=BG_CARD, padx=12, pady=8, highlightbackground=BORDER_COLOR, highlightthickness=1)
     conn_card.pack(fill="x", padx=12, pady=(2, 6))
 
-    # Connection Inputs Grid
     inputs_frame = tk.Frame(conn_card, bg=BG_CARD)
     inputs_frame.pack(side="left")
 
     def make_input(parent, label_text, default_val, width=12, show=None):
         f = tk.Frame(parent, bg=BG_CARD)
         f.pack(side="left", padx=5)
-        tk.Label(f, text=label_text, bg=BG_CARD, fg=BMW_LIGHT_BLUE, font=("Segoe UI", 8, "bold")).pack(anchor="w")
+        tk.Label(f, text=label_text, bg=BG_CARD, fg=COLOR_LIGHT_BLUE, font=("Segoe UI", 8, "bold")).pack(anchor="w")
         var = tk.StringVar(value=default_val)
         entry = tk.Entry(
             f,
@@ -297,13 +263,13 @@ def run_gui():
             width=width,
             bg=BG_INPUT,
             fg=FG_TEXT,
-            insertbackground=BMW_LIGHT_BLUE,
+            insertbackground=COLOR_LIGHT_BLUE,
             font=("Consolas", 10),
             show=show or "",
             relief="flat",
             highlightthickness=1,
             highlightbackground=BORDER_COLOR,
-            highlightcolor=BMW_LIGHT_BLUE,
+            highlightcolor=COLOR_LIGHT_BLUE,
         )
         entry.pack(pady=2)
         return var, entry
@@ -314,23 +280,28 @@ def run_gui():
     pass_var, pass_entry = make_input(inputs_frame, "Password", DEFAULT_PASS, width=13, show="*")
 
     def toggle_pass():
-        pass_entry.config(show="" if pass_entry.cget("show") == "*" else "*")
+        if pass_entry.cget("show") == "*":
+            pass_entry.config(show="")
+            show_pass_btn.config(text="Hide")
+        else:
+            pass_entry.config(show="*")
+            show_pass_btn.config(text="Show")
 
     show_pass_btn = tk.Button(
         inputs_frame,
-        text="👁",
+        text="Show",
         command=toggle_pass,
         bg=BG_INPUT,
         fg=FG_TEXT,
         relief="flat",
         cursor="hand2",
+        font=("Segoe UI", 8),
         bd=0,
         padx=6,
         pady=3,
     )
     show_pass_btn.pack(side="left", padx=(0, 8), pady=(14, 0))
 
-    # Action Buttons on Right of Connection Deck
     conn_actions = tk.Frame(conn_card, bg=BG_CARD)
     conn_actions.pack(side="right")
 
@@ -343,33 +314,89 @@ def run_gui():
             logger=GLOBAL_LOGGER,
         )
 
-    def reboot_hu():
-        if messagebox.askyesno(
-            "Confirm Head Unit Reboot",
-            "Are you sure you want to reboot the BMW EntryNav2 head unit?\n\nThe central screen and audio will restart briefly.",
-        ):
-            def _worker():
-                GLOBAL_LOGGER.log("CMD >>", f"Transmitting reboot command to head unit at {ip_var.get().strip()}...")
-                root.after(0, lambda: status_pill.config(text=" ● Rebooting... ", bg="#3A2500", fg=ACCENT_AMBER))
-                get_ssh().run_command("reboot")
-                GLOBAL_LOGGER.log("OK", "🔄 Head unit reboot command issued successfully.")
-            threading.Thread(target=_worker, daemon=True).start()
+    # ---------------- 3. CORE LOGIC & ACTIONS ----------------
+    def update_connection_status(info: dict):
+        if not info["connected"]:
+            status_pill.config(text=" Head Unit: Unreachable ", bg="#3A1515", fg=COLOR_RED)
+            aa_badge_pill.config(text=" AA: Offline ", bg="#3A1515", fg=COLOR_RED)
+            cur_installed_lbl.config(text="Head Unit: Unreachable (Check ENET cable and IP configuration)", fg=COLOR_RED)
+            return
 
-    # ---------------- 4. NOTEBOOK TABS ----------------
+        status_pill.config(text=f" Reachable: {info['hu_firmware']} ", bg="#122E1A", fg=COLOR_GREEN_BRIGHT)
+
+        if info["installed"]:
+            aa_badge_pill.config(text=f" AA: {info['version']} ", bg="#122E1A", fg=COLOR_GREEN_BRIGHT)
+            cur_installed_lbl.config(
+                text=f"Android Auto: {info['version']} ({info['detection_method']}) | Firmware: {info['hu_firmware']}",
+                fg=COLOR_GREEN_BRIGHT,
+            )
+        else:
+            aa_badge_pill.config(text=" AA: Not Installed ", bg="#3A1515", fg=COLOR_RED)
+            cur_installed_lbl.config(
+                text=f"Android Auto: NOT INSTALLED | Firmware: {info['hu_firmware']}",
+                fg=COLOR_RED,
+            )
+
+    def retrieve_installed_version_action(show_dialog: bool = True):
+        def _worker():
+            ssh = get_ssh()
+            wf = SafetyWorkflow(ssh)
+            info = wf.get_installed_version_info()
+            root.after(0, lambda: update_connection_status(info))
+
+            if not info["connected"] and show_dialog:
+                err_msg = info.get("raw_output") or f"Host unreachable at {ip_var.get().strip()}"
+                root.after(
+                    0,
+                    lambda: messagebox.showerror(
+                        "Connection Failed",
+                        f"Could not reach head unit at {ip_var.get().strip()}.\n\nError: {err_msg}\n\nPlease verify:\n1. ENET cable is securely connected to OBD2 port\n2. Ethernet adapter has an automatic private IP (169.254.x.x)",
+                    ),
+                )
+                return
+
+            if show_dialog and info["connected"]:
+                status_txt = "INSTALLED" if info["installed"] else "NOT INSTALLED"
+                msg = (
+                    f"=== Head Unit Status ===\n\n"
+                    f"• Head Unit Firmware:   {info['hu_firmware']}\n"
+                    f"• Android Auto Status:  {status_txt}\n"
+                    f"• Installed Version:    {info['version']}\n"
+                    f"• Detection Method:     {info['detection_method']}\n"
+                    f"• Active Processes:     {info['running_pids'] or 'None (Stopped)'}\n\n"
+                    f"• Installed Binary Checksums (MD5):\n"
+                    f"  - entry-aad:      {info['entry_aad_md5'] or 'N/A'}\n"
+                    f"  - aa-supervisor:  {info['aa_supervisor_md5'] or 'N/A'}\n"
+                    f"  - libEntryAad.so: {info['lib_entry_aad_md5'] or 'N/A'}\n"
+                )
+                root.after(0, lambda: messagebox.showinfo("Android Auto Version Info", msg))
+
+        threading.Thread(target=_worker, daemon=True).start()
+
+    def test_conn():
+        retrieve_installed_version_action(show_dialog=False)
+
+    def launch_terminal():
+        ssh = get_ssh()
+        ssh.launch_interactive_shell()
+
+    create_btn(conn_actions, "Test Connection", test_conn, bg=COLOR_BLUE, hover_bg="#388BFD").pack(side="left", padx=3)
+    create_btn(conn_actions, "Check AA Version", lambda: retrieve_installed_version_action(show_dialog=True), bg=COLOR_GREEN, hover_bg="#2EA043").pack(side="left", padx=3)
+    create_btn(conn_actions, "Open SSH Terminal", launch_terminal, bg="#316DCA", hover_bg="#4B89E8").pack(side="left", padx=3)
+
+    # ---------------- 4. MAIN TABS ----------------
     notebook = ttk.Notebook(root)
     notebook.pack(fill="both", expand=True, padx=12, pady=4)
 
-    tab_dash = ttk.Frame(notebook)
     tab_update = ttk.Frame(notebook)
-    tab_logs = ttk.Frame(notebook)
     tab_settings = ttk.Frame(notebook)
     tab_net = ttk.Frame(notebook)
+    tab_logs = ttk.Frame(notebook)
 
-    notebook.add(tab_dash, text=" 📊 Dashboard & Overview ")
-    notebook.add(tab_update, text=" ⚡ Update / Flash Car ")
-    notebook.add(tab_logs, text=" 📡 Diagnostic Logs & Wi-Fi ")
-    notebook.add(tab_settings, text=" ⚙️ iDrive Settings & Flags ")
-    notebook.add(tab_net, text=" 🔌 ENET Diagnostics ")
+    notebook.add(tab_update, text=" Flash & Update ")
+    notebook.add(tab_settings, text=" iDrive Settings & Flags ")
+    notebook.add(tab_net, text=" ENET Network Diagnostics ")
+    notebook.add(tab_logs, text=" Diagnostic Logs ")
 
     # ---------------- 5. BOTTOM GLOBAL LOG CONSOLE ----------------
     log_panel = tk.Frame(root, bg=BG_PANEL, padx=12, pady=6, highlightbackground=BORDER_COLOR, highlightthickness=1)
@@ -380,9 +407,9 @@ def run_gui():
 
     tk.Label(
         log_bar,
-        text="📡 Live Activity, Terminal Commands & In-Car Stream:",
+        text="Activity, Terminal Commands & Output Log:",
         bg=BG_PANEL,
-        fg=BMW_LIGHT_BLUE,
+        fg=COLOR_LIGHT_BLUE,
         font=("Segoe UI", 9, "bold"),
     ).pack(side="left")
 
@@ -423,16 +450,16 @@ def run_gui():
                 out_f.write(content)
             messagebox.showinfo("Saved", f"Log saved to:\n{f}")
 
-    create_btn(log_bar, "💾 Save Log...", save_console, bg=BG_CARD, fg=FG_TEXT, hover_bg="#2D333B", font=("Segoe UI", 8), padx=6, pady=2).pack(side="right", padx=2)
-    create_btn(log_bar, "📋 Copy All", copy_console, bg=BG_CARD, fg=FG_TEXT, hover_bg="#2D333B", font=("Segoe UI", 8), padx=6, pady=2).pack(side="right", padx=2)
-    create_btn(log_bar, "🗑️ Clear", clear_console, bg=BG_CARD, fg=FG_TEXT, hover_bg="#2D333B", font=("Segoe UI", 8), padx=6, pady=2).pack(side="right", padx=2)
+    create_btn(log_bar, "Save Log...", save_console, bg=BG_CARD, fg=FG_TEXT, hover_bg="#2D333B", font=("Segoe UI", 8), padx=6, pady=2).pack(side="right", padx=2)
+    create_btn(log_bar, "Copy All", copy_console, bg=BG_CARD, fg=FG_TEXT, hover_bg="#2D333B", font=("Segoe UI", 8), padx=6, pady=2).pack(side="right", padx=2)
+    create_btn(log_bar, "Clear", clear_console, bg=BG_CARD, fg=FG_TEXT, hover_bg="#2D333B", font=("Segoe UI", 8), padx=6, pady=2).pack(side="right", padx=2)
 
     console_txt = scrolledtext.ScrolledText(
         log_panel,
-        height=7,
+        height=8,
         bg="#05080A",
         fg="#E6EDF3",
-        insertbackground=BMW_LIGHT_BLUE,
+        insertbackground=COLOR_LIGHT_BLUE,
         font=("Consolas", 9),
         relief="flat",
         bd=0,
@@ -486,13 +513,13 @@ def run_gui():
         else:
             lower = text.lower()
             tag = "info"
-            if "error" in lower or "failed" in lower or "❌" in text:
+            if "error" in lower or "failed" in lower or "fail" in lower:
                 tag = "err"
-            elif "warn" in lower or "⚠️" in text:
+            elif "warn" in lower:
                 tag = "warn"
-            elif "success" in lower or "✅" in text or "🎉" in text:
+            elif "success" in lower or "passed" in lower:
                 tag = "ok"
-            elif "step" in lower or "🚀" in text or "===" in text:
+            elif "step" in lower or "===" in text:
                 tag = "step"
             txt_widget.insert(tk.END, f"{text}\n", tag)
 
@@ -506,229 +533,22 @@ def run_gui():
 
     GLOBAL_LOGGER.add_listener(append_log)
 
-    # ---------------- TELEMETRY CARD UPDATERS ----------------
-    def update_telemetry_cards(info: dict):
-        if not info["connected"]:
-            card1_val.config(text="Offline / Unreachable", fg=ACCENT_RED)
-            card1_sub.config(text="Check ENET Cable & Engine Status", fg=FG_MUTED)
-            card2_val.config(text="Unknown", fg=FG_MUTED)
-            card2_sub.config(text="Connect to car to verify", fg=FG_MUTED)
-            status_pill.config(text=" ● Offline ", bg="#3A1515", fg=ACCENT_RED)
-            aa_badge_pill.config(text=" AA: ● Offline ", bg="#3A1515", fg=ACCENT_RED)
-            cur_installed_lbl.config(text="Head Unit: Offline / Unreachable (Check ENET Cable)", fg=ACCENT_RED)
-            return
-
-        # Connected
-        card1_val.config(text=f"Connected ({info['hu_firmware']})", fg=ACCENT_GREEN_BRIGHT)
-        card1_sub.config(text=f"IP: {ip_var.get().strip()} | Port: {port_var.get().strip()}", fg=FG_TEXT)
-        status_pill.config(text=f" ● Connected ({info['hu_firmware']}) ", bg="#122E1A", fg=ACCENT_GREEN_BRIGHT)
-
-        if info["installed"]:
-            card2_val.config(text=f"{info['version']}", fg=ACCENT_GREEN_BRIGHT)
-            proc_txt = f"PIDs: {info['running_pids']}" if info['running_pids'] else "Processes: Stopped"
-            card2_sub.config(text=f"{info['detection_method']} | {proc_txt}", fg=FG_TEXT)
-            aa_badge_pill.config(text=f" AA: ● {info['version']} ", bg="#122E1A", fg=ACCENT_GREEN_BRIGHT)
-            cur_installed_lbl.config(
-                text=f"Android Auto: {info['version']} ({info['detection_method']}) | iDrive FW: {info['hu_firmware']}",
-                fg=ACCENT_GREEN_BRIGHT,
-            )
-        else:
-            card2_val.config(text="NOT INSTALLED", fg=ACCENT_RED)
-            card2_sub.config(text="/opt/aa empty on head unit flash", fg=FG_MUTED)
-            aa_badge_pill.config(text=" AA: ● Not Installed ", bg="#3A1515", fg=ACCENT_RED)
-            cur_installed_lbl.config(
-                text=f"Android Auto: NOT INSTALLED | iDrive FW: {info['hu_firmware']}",
-                fg=ACCENT_RED,
-            )
-
-        if info["vehicle_model"] or info["vehicle_year"]:
-            card4_val.config(text=f"{info['vehicle_model'] or 'iDrive'} ({info['vehicle_year'] or '2019'})", fg=FG_TEXT)
-
-    # ---------------- SHARED ACTIONS ----------------
-    def retrieve_installed_version_action(show_dialog: bool = True):
-        def _worker():
-            ssh = get_ssh()
-            wf = SafetyWorkflow(ssh)
-            info = wf.get_installed_version_info()
-            root.after(0, lambda: update_telemetry_cards(info))
-
-            if not info["connected"] and show_dialog:
-                err_msg = info.get("raw_output") or f"Host unreachable at {ip_var.get().strip()}"
-                root.after(
-                    0,
-                    lambda: messagebox.showerror(
-                        "Connection Error",
-                        f"Could not reach head unit at {ip_var.get().strip()}.\n\nError: {err_msg}\n\nPlease verify:\n1. ENET cable is firmly plugged into OBD2 port\n2. Car engine is running (14V power rail)\n3. Ethernet adapter has automatic APIPA 169.254.x.x IP assigned",
-                    ),
-                )
-                return
-
-            if show_dialog and info["connected"]:
-                status_txt = "INSTALLED & READY" if info["installed"] else "NOT INSTALLED"
-                msg = (
-                    f"=== BMW EntryNav2 Android Auto Details ===\n\n"
-                    f"• Android Auto Status:   {status_txt}\n"
-                    f"• Android Auto Version:  {info['version']}\n"
-                    f"• Detection Method:     {info['detection_method']}\n\n"
-                    f"• Running Processes:    {info['running_pids'] or 'None (Stopped)'}\n"
-                    f"• Car iDrive Firmware:  {info['hu_firmware']}\n"
-                    f"• Vehicle Profile:      Model: {info['vehicle_model'] or 'iDrive (default)'}, Year: {info['vehicle_year'] or '2019'}\n\n"
-                    f"• Installed Binary Checksums (MD5):\n"
-                    f"  - entry-aad:      {info['entry_aad_md5'] or 'N/A'}\n"
-                    f"  - aa-supervisor:  {info['aa_supervisor_md5'] or 'N/A'}\n"
-                    f"  - libEntryAad.so: {info['lib_entry_aad_md5'] or 'N/A'}\n"
-                )
-                root.after(0, lambda: messagebox.showinfo("Android Auto Installed Version", msg))
-
-        threading.Thread(target=_worker, daemon=True).start()
-
-    def test_conn():
-        retrieve_installed_version_action(show_dialog=False)
-        update_log_status_ui()
-
-    def launch_terminal():
-        ssh = get_ssh()
-        ssh.launch_interactive_shell()
-
-    # Wire Connection Deck Buttons
-    create_btn(conn_actions, "🔗 Connect", test_conn, bg=BMW_BLUE, hover_bg="#388BFD").pack(side="left", padx=3)
-    create_btn(conn_actions, "🔍 Check AA", lambda: retrieve_installed_version_action(show_dialog=True), bg=ACCENT_GREEN, hover_bg="#2EA043").pack(side="left", padx=3)
-    create_btn(conn_actions, "💻 Terminal", launch_terminal, bg="#316DCA", hover_bg="#4B89E8").pack(side="left", padx=3)
-    create_btn(conn_actions, "🔄 Reboot HU", reboot_hu, bg=ACCENT_PURPLE, hover_bg="#A371F7").pack(side="left", padx=3)
-
     # =========================================================================
-    # TAB 1: MODERN DASHBOARD & LIVE VEHICLE TELEMETRY
-    # =========================================================================
-    dash_container = tk.Frame(tab_dash, bg=BG_DARK, padx=8, pady=8)
-    dash_container.pack(fill="both", expand=True)
-
-    # 4-Card Live Telemetry Grid
-    cards_grid = tk.Frame(dash_container, bg=BG_DARK)
-    cards_grid.pack(fill="x", pady=(0, 8))
-    cards_grid.columnconfigure(0, weight=1)
-    cards_grid.columnconfigure(1, weight=1)
-    cards_grid.columnconfigure(2, weight=1)
-    cards_grid.columnconfigure(3, weight=1)
-
-    def make_telemetry_box(parent, col, title, icon):
-        box = tk.Frame(parent, bg=BG_PANEL, highlightbackground=BORDER_COLOR, highlightthickness=1, padx=12, pady=10)
-        box.grid(row=0, column=col, sticky="nsew", padx=4)
-        top = tk.Frame(box, bg=BG_PANEL)
-        top.pack(fill="x")
-        tk.Label(top, text=f"{icon} {title}", bg=BG_PANEL, fg=BMW_LIGHT_BLUE, font=("Segoe UI", 9, "bold")).pack(side="left")
-        val_lbl = tk.Label(box, text="Not Checked", bg=BG_PANEL, fg=FG_TEXT, font=("Segoe UI", 11, "bold"))
-        val_lbl.pack(anchor="w", pady=(6, 2))
-        sub_lbl = tk.Label(box, text="Click Connect to query", bg=BG_PANEL, fg=FG_MUTED, font=("Segoe UI", 8))
-        sub_lbl.pack(anchor="w")
-        return val_lbl, sub_lbl
-
-    card1_val, card1_sub = make_telemetry_box(cards_grid, 0, "HEAD UNIT LINK", "🚗")
-    card2_val, card2_sub = make_telemetry_box(cards_grid, 1, "ANDROID AUTO", "📱")
-    card3_val, card3_sub = make_telemetry_box(cards_grid, 2, "WI-FI LINK RF", "📡")
-    card4_val, card4_sub = make_telemetry_box(cards_grid, 3, "VEHICLE PROFILE", "🏎️")
-
-    # Quick Control Action Deck
-    dash_actions_card = create_card(dash_container, "⚡ QUICK COMMAND CENTER", "One-Click Head Unit Operations", pady_outer=6)
-    action_btns_row = tk.Frame(dash_actions_card, bg=BG_PANEL)
-    action_btns_row.pack(fill="x", pady=4)
-
-    def start_android_auto():
-        def _worker():
-            GLOBAL_LOGGER.log("INFO", "Starting Android Auto daemon on head unit...")
-            cmd = "export XDG_RUNTIME_DIR=/run/system/0 WAYLAND_DISPLAY=wayland-0 LD_LIBRARY_PATH=/usr/local/lib:/opt/hmi/lib:/usr/lib:/lib HOME=/tmp; nohup /opt/aa/aa-supervisor > /dev/null 2>&1 &"
-            get_ssh().run_command(cmd)
-            time.sleep(1.0)
-            code, out, _ = get_ssh().run_command("pidof aa-supervisor entry-aad")
-            if out.strip():
-                GLOBAL_LOGGER.log("OK", f"✅ Android Auto started successfully (PID: {out.strip()}).")
-                retrieve_installed_version_action(show_dialog=False)
-            else:
-                GLOBAL_LOGGER.log("WARN", "⚠️ Start command issued. Please confirm from iDrive Media menu.")
-        threading.Thread(target=_worker, daemon=True).start()
-
-    def stop_android_auto():
-        def _worker():
-            GLOBAL_LOGGER.log("INFO", "Stopping Android Auto processes on head unit...")
-            get_ssh().run_command("killall aa-supervisor entry-aad 2>/dev/null; sleep 1; killall -9 aa-supervisor entry-aad 2>/dev/null")
-            time.sleep(1.0)
-            code, out, _ = get_ssh().run_command("pidof aa-supervisor entry-aad")
-            if not out.strip():
-                GLOBAL_LOGGER.log("OK", "✅ Android Auto processes stopped cleanly.")
-                retrieve_installed_version_action(show_dialog=False)
-            else:
-                GLOBAL_LOGGER.log("WARN", f"⚠️ Processes still active: {out.strip()}")
-        threading.Thread(target=_worker, daemon=True).start()
-
-    def on_check_system_stats():
-        def _worker():
-            GLOBAL_LOGGER.log("INFO", "Querying head unit system health & resources...")
-            ssh = get_ssh()
-            ssh.run_command("head -n 1 /etc/version")
-            ssh.run_command("uptime")
-            ssh.run_command("free -m")
-            ssh.run_command("df -h /")
-            ssh.run_command("pidof HmiMain3D aa-supervisor entry-aad")
-        threading.Thread(target=_worker, daemon=True).start()
-
-    create_btn(action_btns_row, "🟢 Start Android Auto", start_android_auto, bg=ACCENT_GREEN, hover_bg="#2EA043").pack(side="left", padx=4)
-    create_btn(action_btns_row, "🔴 Stop Android Auto", stop_android_auto, bg=ACCENT_RED, hover_bg="#B62324").pack(side="left", padx=4)
-    create_btn(action_btns_row, "💻 Launch Root Terminal", launch_terminal, bg=BMW_BLUE, hover_bg="#388BFD").pack(side="left", padx=4)
-    create_btn(action_btns_row, "📊 System Health Stats", on_check_system_stats, bg=BG_CARD, fg=FG_TEXT, hover_bg="#2D333B").pack(side="left", padx=4)
-    create_btn(action_btns_row, "🔄 Reboot Head Unit", reboot_hu, bg=ACCENT_PURPLE, hover_bg="#A371F7").pack(side="left", padx=4)
-
-    # Dashboard Architecture Overview Card
-    dash_guide_card = create_card(dash_container, "🛡️ ARCHITECTURE & AUTOMOTIVE SAFETY SAFEGUARDS", "Active Protection Suite", fill="both")
-    dash_guide_txt = scrolledtext.ScrolledText(
-        dash_guide_card,
-        height=11,
-        bg=BG_INPUT,
-        fg=FG_TEXT,
-        font=("Consolas", 9),
-        relief="flat",
-        bd=0,
-    )
-    dash_guide_txt.pack(fill="both", expand=True)
-    dash_guide_txt.insert(
-        tk.END,
-        f"""BMW EntryNav2 Android Auto Windows Suite v2.0
-Upstream Project: https://github.com/{DEFAULT_REPO} (Created by Jiraiya43 & Community)
-
-OPERATIONAL PROFILE:
-• Engine Running (14.2V active alternator rail) guarantees continuous power and prevents sleep timeouts.
-• ENET OBD2 Cable: Auto-IP (APIPA 169.254.x.x) assigned automatically via DHCP.
-
-ACTIVE SAFETY & FAILSAFE SAFEGUARDS:
-1. Dynamic Pre-Flight Checks:
-   Verifies iDrive OS firmware, root partition free space (>= 16 MB required), and stops active daemons gracefully.
-2. In-Memory Staging:
-   Update archives are written strictly to RAM-disk (/tmp tmpfs) to eliminate flash memory wear.
-3. In-Car Checksum Verification:
-   Validates archive contents with 'md5sum -c MD5SUMS' before touching head unit flash.
-4. Dynamic Linker & Rehearsal Compatibility:
-   Executes LD_TRACE_LOADED_OBJECTS checks and non-destructive dry-run (aa-supervisor --compat).
-5. Pre-Flash Snapshot & Automated Rollback:
-   Creates snapshot in /tmp/aa_backup/ and tests flashed binaries; rolls back automatically if integrity check fails.
-6. Diagnostic Wi-Fi Analyzer:
-   Parses [WifiLink] metrics into structured RF signal health (dBm, band, channel, packet retries, latency).
-""",
-    )
-
-    # =========================================================================
-    # TAB 2: UPDATE & SAFE FLASHING
+    # TAB 1: FLASH & UPDATE
     # =========================================================================
     up_container = tk.Frame(tab_update, bg=BG_DARK, padx=8, pady=8)
     up_container.pack(fill="both", expand=True)
 
-    # Current Car State Header
+    # State Banner
     state_card = tk.Frame(up_container, bg=BG_PANEL, padx=12, pady=8, highlightbackground=BORDER_COLOR, highlightthickness=1)
     state_card.pack(fill="x", pady=(0, 6))
-    tk.Label(state_card, text="Car State:", bg=BG_PANEL, fg=BMW_LIGHT_BLUE, font=("Segoe UI", 9, "bold")).pack(side="left")
-    cur_installed_lbl = tk.Label(state_card, text="Android Auto: Not Checked | iDrive FW: Not Checked", bg=BG_PANEL, fg=FG_TEXT, font=("Segoe UI", 9))
+    tk.Label(state_card, text="Current State:", bg=BG_PANEL, fg=COLOR_LIGHT_BLUE, font=("Segoe UI", 9, "bold")).pack(side="left")
+    cur_installed_lbl = tk.Label(state_card, text="Head Unit: Not Checked | Android Auto: Not Checked", bg=BG_PANEL, fg=FG_TEXT, font=("Segoe UI", 9))
     cur_installed_lbl.pack(side="left", padx=8)
-    create_btn(state_card, "🔍 Refresh Car State", lambda: retrieve_installed_version_action(show_dialog=False), bg=BG_CARD, fg=FG_TEXT, hover_bg="#2D333B", font=("Segoe UI", 8), padx=8, pady=2).pack(side="right")
+    create_btn(state_card, "Refresh State", lambda: retrieve_installed_version_action(show_dialog=False), bg=BG_CARD, fg=FG_TEXT, hover_bg="#2D333B", font=("Segoe UI", 8), padx=8, pady=2).pack(side="right")
 
-    # Step 1: Select Release Archive Card
-    rel_card = create_card(up_container, "STEP 1: SELECT RELEASE ARCHIVE", "Dynamic Upstream Fetch (No Hardcoded Versions)")
+    # Step 1: Release Archive Selection
+    rel_card = create_card(up_container, "Select Release Archive", "Dynamic GitHub Releases Feed")
     rel_ctrl_frame = tk.Frame(rel_card, bg=BG_PANEL)
     rel_ctrl_frame.pack(fill="x", pady=4)
 
@@ -745,7 +565,7 @@ ACTIVE SAFETY & FAILSAFE SAFEGUARDS:
                 fetched_releases.clear()
                 fetched_releases.extend(rels)
                 display_items = [
-                    f"{r['tag']} ({r['published_at'][:10] if r.get('published_at') else ''}) {'[PRE-RELEASE]' if r['prerelease'] else '[STABLE]'}"
+                    f"{r['tag']} ({r['published_at'][:10] if r.get('published_at') else ''}) {'[Pre-Release]' if r['prerelease'] else '[Stable]'}"
                     for r in rels
                 ]
                 def _update():
@@ -759,7 +579,7 @@ ACTIVE SAFETY & FAILSAFE SAFEGUARDS:
                 GLOBAL_LOGGER.log("ERROR", f"Error fetching releases: {e}")
         threading.Thread(target=_worker, daemon=True).start()
 
-    create_btn(rel_ctrl_frame, "🔄 Refresh GitHub", fetch_rels, bg=BG_CARD, fg=FG_TEXT, hover_bg="#2D333B", font=("Segoe UI", 8, "bold")).pack(side="left", padx=3)
+    create_btn(rel_ctrl_frame, "Refresh Releases", fetch_rels, bg=BG_CARD, fg=FG_TEXT, hover_bg="#2D333B", font=("Segoe UI", 8, "bold")).pack(side="left", padx=3)
 
     local_tar_path_var = tk.StringVar()
     expected_sha_var = tk.StringVar()
@@ -779,8 +599,8 @@ ACTIVE SAFETY & FAILSAFE SAFEGUARDS:
                 except Exception:
                     pass
 
-    create_btn(rel_ctrl_frame, "📁 Browse Local .tar...", browse_local, bg=BG_CARD, fg=FG_TEXT, hover_bg="#2D333B", font=("Segoe UI", 8, "bold")).pack(side="left", padx=3)
-    create_btn(rel_ctrl_frame, "⭐ Upstream Repo", lambda: webbrowser.open(UPSTREAM_URL), bg=BG_CARD, fg=BMW_LIGHT_BLUE, hover_bg="#2D333B", font=("Segoe UI", 8), padx=6).pack(side="right")
+    create_btn(rel_ctrl_frame, "Browse Local .tar...", browse_local, bg=BG_CARD, fg=FG_TEXT, hover_bg="#2D333B", font=("Segoe UI", 8, "bold")).pack(side="left", padx=3)
+    create_btn(rel_ctrl_frame, "Open Upstream Repo", lambda: webbrowser.open(UPSTREAM_URL), bg=BG_CARD, fg=COLOR_LIGHT_BLUE, hover_bg="#2D333B", font=("Segoe UI", 8), padx=6).pack(side="right")
 
     def on_rel_selected(event):
         idx = rel_combobox.current()
@@ -796,14 +616,14 @@ ACTIVE SAFETY & FAILSAFE SAFEGUARDS:
 
     sha_row = tk.Frame(rel_card, bg=BG_PANEL)
     sha_row.pack(fill="x", pady=(6, 2))
-    tk.Label(sha_row, text="Expected SHA-256:", bg=BG_PANEL, fg=BMW_LIGHT_BLUE, font=("Segoe UI", 8, "bold")).pack(side="left")
+    tk.Label(sha_row, text="Expected SHA-256:", bg=BG_PANEL, fg=COLOR_LIGHT_BLUE, font=("Segoe UI", 8, "bold")).pack(side="left")
     sha_entry = tk.Entry(
         sha_row,
         textvariable=expected_sha_var,
         width=74,
         bg=BG_INPUT,
         fg=FG_TEXT,
-        insertbackground=BMW_LIGHT_BLUE,
+        insertbackground=COLOR_LIGHT_BLUE,
         font=("Consolas", 9),
         relief="flat",
         highlightthickness=1,
@@ -811,21 +631,8 @@ ACTIVE SAFETY & FAILSAFE SAFEGUARDS:
     )
     sha_entry.pack(side="left", padx=8)
 
-    # Step 2: Vehicle Metadata (Optional)
-    veh_card = create_card(up_container, "STEP 2: VEHICLE PROFILE (OPTIONAL)", "Customizes Head Unit Calibration")
-    veh_row = tk.Frame(veh_card, bg=BG_PANEL)
-    veh_row.pack(fill="x", pady=2)
-
-    tk.Label(veh_row, text="Vehicle Model (e.g. 320d, X3, M340i):", bg=BG_PANEL, fg=FG_TEXT, font=("Segoe UI", 9)).pack(side="left")
-    model_var = tk.StringVar(value="")
-    tk.Entry(veh_row, textvariable=model_var, width=14, bg=BG_INPUT, fg=FG_TEXT, insertbackground=BMW_LIGHT_BLUE, font=("Segoe UI", 9), relief="flat", highlightthickness=1, highlightbackground=BORDER_COLOR).pack(side="left", padx=(6, 16))
-
-    tk.Label(veh_row, text="Year (e.g. 2020):", bg=BG_PANEL, fg=FG_TEXT, font=("Segoe UI", 9)).pack(side="left")
-    year_var = tk.StringVar(value="")
-    tk.Entry(veh_row, textvariable=year_var, width=8, bg=BG_INPUT, fg=FG_TEXT, insertbackground=BMW_LIGHT_BLUE, font=("Segoe UI", 9), relief="flat", highlightthickness=1, highlightbackground=BORDER_COLOR).pack(side="left", padx=6)
-
-    # Step 3: Flash Execution & Live Head Unit Stream Card
-    flash_card = create_card(up_container, "STEP 3: AUTOMOTIVE FLASH PROCEDURE", "Full In-Car Execution & Verification", fill="both")
+    # Step 2: Flash Action & Progress
+    flash_card = create_card(up_container, "Flash Procedure", "In-Car Installation & Verification", fill="both")
 
     def set_flash_progress(step: int, text: str):
         root.after(0, lambda: (
@@ -836,7 +643,14 @@ ACTIVE SAFETY & FAILSAFE SAFEGUARDS:
     def start_flashing():
         expected_sha = expected_sha_var.get().strip().lower()
         if not expected_sha:
-            messagebox.showerror("Error", "Please select a release or enter expected SHA-256 first.")
+            messagebox.showerror("SHA Required", "Please select a release or enter the expected SHA-256 first.")
+            return
+
+        confirm = messagebox.askyesno(
+            "Confirm Flash / Update",
+            "Notice: It is recommended to have the car engine running during flashing to ensure stable power.\n\nDo you want to proceed with installing this update?",
+        )
+        if not confirm:
             return
 
         idx = rel_combobox.current()
@@ -878,56 +692,59 @@ ACTIVE SAFETY & FAILSAFE SAFEGUARDS:
                     elif "[Step 3/8]" in msg:
                         set_flash_progress(3, "Step 3/8: RAM-disk upload...")
                     elif "[Step 4/8]" in msg:
-                        set_flash_progress(4, "Step 4/8: In-car MD5 verify...")
+                        set_flash_progress(4, "Step 4/8: In-car MD5 check...")
                     elif "[Step 5/8]" in msg:
-                        set_flash_progress(5, "Step 5/8: Linker symbol resolution...")
+                        set_flash_progress(5, "Step 5/8: Dynamic linker resolution...")
                     elif "[Step 6/8]" in msg:
                         set_flash_progress(6, "Step 6/8: Compatibility test...")
                     elif "[Step 7/8]" in msg:
-                        set_flash_progress(7, "Step 7/8: Flash install & backup...")
+                        set_flash_progress(7, "Step 7/8: Flash install & snapshot...")
                     elif "[Step 8/8]" in msg:
                         set_flash_progress(8, "Step 8/8: Verifying flash...")
                     elif "INSTALLATION / UPDATE COMPLETED SUCCESSFULLY" in msg:
-                        set_flash_progress(8, "✅ Done / Completed")
+                        set_flash_progress(8, "Completed successfully")
 
                 ssh = get_ssh()
                 wf = SafetyWorkflow(ssh, log_callback=logged_progress)
                 success = wf.verify_and_install(
                     local_tar_path=target_tar,
                     expected_sha256=expected_sha,
-                    vehicle_model=model_var.get(),
-                    vehicle_year=year_var.get(),
                 )
 
                 if success:
-                    set_flash_progress(8, "✅ Done / Completed")
+                    set_flash_progress(8, "Completed successfully")
                     retrieve_installed_version_action(show_dialog=False)
-                    ask = messagebox.askyesno(
+                    messagebox.showinfo(
                         "Installation Complete",
-                        "Installation completed and verified on flash!\n\nWould you like to reboot the head unit now?",
+                        "Android Auto has been installed and verified on head unit flash.\n\nRestart iDrive by holding the volume knob for 25 seconds, then open Android Auto from the Media menu.",
                     )
-                    if ask:
-                        reboot_hu()
                 else:
                     set_flash_progress(0, "Failed: Aborted")
                     messagebox.showerror(
                         "Installation Aborted",
-                        "Safety checks prevented installation or an error occurred. Any previous state was protected.",
+                        "Safety checks prevented installation or verification failed. Previous head unit state was preserved.",
                     )
             finally:
                 root.after(0, lambda: flash_btn.configure(state="normal"))
 
         threading.Thread(target=_flash_thread, daemon=True).start()
 
-    # Progress and Flash Action
+    tk.Label(
+        flash_card,
+        text="Recommendation: Keep the car engine running during flashing to ensure stable power.",
+        bg=BG_PANEL,
+        fg=COLOR_AMBER,
+        font=("Segoe UI", 9),
+    ).pack(anchor="w", pady=(0, 6))
+
     flash_bar_row = tk.Frame(flash_card, bg=BG_PANEL)
     flash_bar_row.pack(fill="x", pady=4)
 
     flash_btn = create_btn(
         flash_bar_row,
-        "⚡ START SAFE FLASH / UPDATE",
+        "Start Safe Update / Flash",
         start_flashing,
-        bg=ACCENT_GREEN,
+        bg=COLOR_GREEN,
         hover_bg="#2EA043",
         font=("Segoe UI", 10, "bold"),
         padx=16,
@@ -941,13 +758,13 @@ ACTIVE SAFETY & FAILSAFE SAFEGUARDS:
     flash_progressbar = ttk.Progressbar(prog_area, orient="horizontal", mode="determinate", maximum=8)
     flash_progressbar.pack(fill="x", pady=2)
 
-    flash_progress_lbl = tk.Label(prog_area, text="Ready to update", bg=BG_PANEL, fg=BMW_LIGHT_BLUE, font=("Segoe UI", 8, "bold"))
+    flash_progress_lbl = tk.Label(prog_area, text="Ready to update", bg=BG_PANEL, fg=COLOR_LIGHT_BLUE, font=("Segoe UI", 8, "bold"))
     flash_progress_lbl.pack(anchor="w")
 
     # In-Car Live Stream Console
     stream_hdr = tk.Frame(flash_card, bg=BG_PANEL)
     stream_hdr.pack(fill="x", pady=(6, 2))
-    tk.Label(stream_hdr, text="📡 Live In-Car Stream & Execution Trace:", bg=BG_PANEL, fg=FG_TEXT, font=("Segoe UI", 9, "bold")).pack(side="left")
+    tk.Label(stream_hdr, text="In-Car Terminal Execution Trace:", bg=BG_PANEL, fg=FG_TEXT, font=("Segoe UI", 9, "bold")).pack(side="left")
 
     def clear_hu_stream():
         hu_stream_txt.delete("1.0", tk.END)
@@ -957,14 +774,14 @@ ACTIVE SAFETY & FAILSAFE SAFEGUARDS:
         if c:
             root.clipboard_clear()
             root.clipboard_append(c)
-            messagebox.showinfo("Copied", "Terminal trace copied!")
+            messagebox.showinfo("Copied", "Trace copied to clipboard!")
 
-    create_btn(stream_hdr, "📋 Copy", copy_hu_stream, bg=BG_CARD, fg=FG_TEXT, hover_bg="#2D333B", font=("Segoe UI", 8), padx=6, pady=1).pack(side="right", padx=2)
-    create_btn(stream_hdr, "🗑️ Clear", clear_hu_stream, bg=BG_CARD, fg=FG_TEXT, hover_bg="#2D333B", font=("Segoe UI", 8), padx=6, pady=1).pack(side="right", padx=2)
+    create_btn(stream_hdr, "Copy", copy_hu_stream, bg=BG_CARD, fg=FG_TEXT, hover_bg="#2D333B", font=("Segoe UI", 8), padx=6, pady=1).pack(side="right", padx=2)
+    create_btn(stream_hdr, "Clear", clear_hu_stream, bg=BG_CARD, fg=FG_TEXT, hover_bg="#2D333B", font=("Segoe UI", 8), padx=6, pady=1).pack(side="right", padx=2)
 
     hu_stream_txt = scrolledtext.ScrolledText(
         flash_card,
-        height=9,
+        height=11,
         bg="#05080A",
         fg="#3FB950",
         insertbackground="#3FB950",
@@ -983,24 +800,172 @@ ACTIVE SAFETY & FAILSAFE SAFEGUARDS:
     GLOBAL_LOGGER.add_listener(append_hu_stream)
 
     # =========================================================================
-    # TAB 3: DIAGNOSTIC LOGS & WI-FI ANALYZER
+    # TAB 2: IDRIVE SETTINGS & FLAGS
+    # =========================================================================
+    set_container = tk.Frame(tab_settings, bg=BG_DARK, padx=8, pady=8)
+    set_container.pack(fill="both", expand=True)
+
+    flags_card = create_card(set_container, "iDrive Configuration Flags", "Saved in /var/local/data/AA (Disconnect-Safe)", fill="both")
+    flags_dict = {key: tk.BooleanVar(value=False) for key in SUPPORTED_FLAGS}
+
+    flags_grid = tk.Frame(flags_card, bg=BG_PANEL)
+    flags_grid.pack(fill="both", expand=True, pady=4)
+    flags_grid.columnconfigure(0, weight=1)
+    flags_grid.columnconfigure(1, weight=1)
+
+    flag_descriptions = {
+        "autostart": "Auto-start Android Auto daemon immediately on iDrive boot",
+        "usb": "Force USB wired connection (disables Wi-Fi requirement)",
+        "entry-direct": "Launch directly into Android Auto without sub-menu navigation",
+        "kombi-off": "Disable turn-by-turn navigation arrows in instrument cluster / HUD",
+        "kombi-single-maneuver": "Display single maneuver route graph (for clusters rejecting full graphs)",
+        "gps-telephone": "Use phone's internal GPS antenna instead of vehicle roof antenna",
+    }
+
+    row_idx = 0
+    for key, label in SUPPORTED_FLAGS.items():
+        col_idx = row_idx % 2
+        r = row_idx // 2
+        item_box = tk.Frame(flags_grid, bg=BG_CARD, padx=10, pady=8, highlightbackground=BORDER_COLOR, highlightthickness=1)
+        item_box.grid(row=r, column=col_idx, sticky="nsew", padx=4, pady=4)
+
+        cb = tk.Checkbutton(
+            item_box,
+            text=f" {key}",
+            variable=flags_dict[key],
+            bg=BG_CARD,
+            fg=COLOR_LIGHT_BLUE,
+            selectcolor=BG_INPUT,
+            activebackground=BG_CARD,
+            activeforeground=COLOR_LIGHT_BLUE,
+            font=("Segoe UI", 10, "bold"),
+        )
+        cb.pack(anchor="w")
+
+        desc_text = flag_descriptions.get(key, label)
+        tk.Label(item_box, text=desc_text, bg=BG_CARD, fg=FG_TEXT, font=("Segoe UI", 8), wraplength=420, justify="left").pack(anchor="w", padx=20, pady=(2, 0))
+        row_idx += 1
+
+    def read_flags():
+        def _worker():
+            cfg = CarConfigManager(get_ssh())
+            success, flags = cfg.read_flags()
+            if success:
+                for key, val in flags.items():
+                    if key in flags_dict:
+                        root.after(0, lambda v=flags_dict[key], s=val: v.set(s))
+            else:
+                GLOBAL_LOGGER.log("WARN", "Flags preserved (did not overwrite local selections while offline).")
+        threading.Thread(target=_worker, daemon=True).start()
+
+    def save_flags():
+        def _worker():
+            cfg = CarConfigManager(get_ssh())
+            current = {k: v.get() for k, v in flags_dict.items()}
+            cfg.save_flags(current)
+        threading.Thread(target=_worker, daemon=True).start()
+
+    def on_uninstall():
+        if messagebox.askyesno(
+            "Confirm Uninstall",
+            "Are you sure you want to completely uninstall EntryNav2 Android Auto from the car?\n\nThis removes /opt/aa, plugins, and configuration flags.",
+        ):
+            def _worker():
+                GLOBAL_LOGGER.log("WARN", "Removing Android Auto from head unit...")
+                cmd = """
+mount -o remount,rw / && \\
+rm -rf /opt/hmi/data/ro/Plugins/EntryAad /opt/aa && \\
+sync && \\
+(mount -o remount,ro / 2>/dev/null || true) && \\
+rm -rf /var/local/data/AA
+"""
+                code, out, err = get_ssh().run_command(cmd)
+                get_ssh().run_command("sync; mount -o remount,ro / 2>/dev/null || true")
+                if code == 0:
+                    GLOBAL_LOGGER.log("OK", "Android Auto uninstalled successfully.")
+                    root.after(0, lambda: aa_badge_pill.config(text=" AA: Not Installed ", bg="#3A1515", fg=COLOR_RED))
+                else:
+                    GLOBAL_LOGGER.log("ERROR", f"Uninstall failed: {err}")
+            threading.Thread(target=_worker, daemon=True).start()
+
+    flags_btn_row = tk.Frame(flags_card, bg=BG_PANEL)
+    flags_btn_row.pack(fill="x", pady=6)
+    create_btn(flags_btn_row, "Read Settings from Car", read_flags, bg=BG_CARD, fg=FG_TEXT, hover_bg="#2D333B").pack(side="left", padx=4)
+    create_btn(flags_btn_row, "Save Settings to Car", save_flags, bg=COLOR_GREEN, hover_bg="#2EA043").pack(side="left", padx=6)
+    create_btn(flags_btn_row, "Uninstall Android Auto", on_uninstall, bg=COLOR_RED, hover_bg="#B62324").pack(side="right", padx=4)
+
+    # =========================================================================
+    # TAB 3: ENET NETWORK DIAGNOSTICS
+    # =========================================================================
+    net_container = tk.Frame(tab_net, bg=BG_DARK, padx=8, pady=8)
+    net_container.pack(fill="both", expand=True)
+
+    net_card = create_card(net_container, "ENET Cable & Network Adapter Check", "Scans Windows Adapters & Pings Car")
+    net_info_lbl = tk.Label(net_card, text="Click 'Scan Network & Ping Car' to check physical and IP connection.", bg=BG_PANEL, fg=FG_TEXT, font=("Segoe UI", 9), justify="left")
+    net_info_lbl.pack(anchor="w", pady=4)
+
+    def scan_network():
+        def _worker():
+            GLOBAL_LOGGER.log("INFO", "Scanning local network adapters for ENET connection...")
+            summary = NetworkDiagnostics.get_adapter_summary()
+            ping_ok, ping_msg = NetworkDiagnostics.ping_host(ip_var.get().strip())
+
+            lines = [
+                f"• Link Status:       {summary['recommendation']}",
+                f"• Head Unit Ping:    {ping_msg}",
+                f"• Active Adapters:   {len(summary['active_adapters'])} detected"
+            ]
+            for ad in summary["active_adapters"]:
+                lines.append(f"  - {ad.get('name', 'Adapter')}: {ad.get('ip', 'N/A')}")
+
+            full_text = "\n".join(lines)
+            root.after(0, lambda: net_info_lbl.config(text=full_text))
+            GLOBAL_LOGGER.log("OK" if (summary["has_apipa"] or ping_ok) else "WARN", ping_msg)
+        threading.Thread(target=_worker, daemon=True).start()
+
+    create_btn(net_card, "Scan Network & Ping Car", scan_network, bg=COLOR_BLUE, hover_bg="#388BFD").pack(anchor="w", pady=6)
+
+    net_guide_card = create_card(net_container, "Hardware Connection Checklist", "Standard OBD2 ENET Setup", fill="both")
+    net_guide = scrolledtext.ScrolledText(net_guide_card, height=12, bg=BG_INPUT, fg=FG_TEXT, font=("Consolas", 9), relief="flat", bd=0)
+    net_guide.pack(fill="both", expand=True)
+    net_guide.insert(
+        tk.END,
+        """=== ENET OBD2 Hardware & Connection Checklist ===
+
+1. Physical Connection:
+   • Plug the OBD2 connector into the driver footwell diagnostic port.
+   • Connect the RJ45 Ethernet cable to your PC (or USB-C Ethernet adapter).
+
+2. Network Adapter Configuration:
+   • Leave the Ethernet adapter on 'Automatic (DHCP)'.
+   • The BMW head unit assigns an automatic private IP (169.254.x.x).
+   • Note: Windows may take 10-20 seconds to establish the APIPA link.
+
+3. Default Head Unit Credentials:
+   • Head Unit IP: 169.254.1.0
+   • Port:         22
+   • Username:     root
+   • Password:     Entry0?Evo!1
+""",
+    )
+
+    # =========================================================================
+    # TAB 4: DIAGNOSTIC LOGS
     # =========================================================================
     logs_container = tk.Frame(tab_logs, bg=BG_DARK, padx=8, pady=8)
     logs_container.pack(fill="both", expand=True)
 
-    # Logging State Card
-    log_status_card = create_card(logs_container, "CAR MAINTENANCE LOGGING STATUS", "Flag: /var/local/data/AA/maintenance")
+    log_status_card = create_card(logs_container, "Head Unit Maintenance Logging", "Controls /var/local/data/AA/maintenance")
     stat_row = tk.Frame(log_status_card, bg=BG_PANEL)
     stat_row.pack(fill="x")
 
-    log_status_lbl = tk.Label(stat_row, text="● Logging: Not Checked", bg=BG_PANEL, fg=FG_MUTED, font=("Segoe UI", 10, "bold"))
+    log_status_lbl = tk.Label(stat_row, text="Logging: Not Checked", bg=BG_PANEL, fg=FG_MUTED, font=("Segoe UI", 10, "bold"))
     log_status_lbl.pack(side="left")
 
     log_files_lbl = tk.Label(log_status_card, text="Files on car: Not checked", bg=BG_PANEL, fg=FG_MUTED, font=("Segoe UI", 8))
     log_files_lbl.pack(anchor="w", pady=(4, 0))
 
-    # Controls Deck
-    log_ctrl_card = create_card(logs_container, "DIAGNOSTIC CONTROLS & LOG RETRIEVAL", "Download and Parse In-Car Logs")
+    log_ctrl_card = create_card(logs_container, "Log Actions", "Retrieve Diagnostic Logs from Car")
     log_ctrl_row = tk.Frame(log_ctrl_card, bg=BG_PANEL)
     log_ctrl_row.pack(fill="x", pady=2)
 
@@ -1010,18 +975,18 @@ ACTIVE SAFETY & FAILSAFE SAFEGUARDS:
             st = lm.get_logging_status()
             if not st["connected"]:
                 root.after(0, lambda: (
-                    log_status_lbl.config(text="● Logging: Offline / Unreachable", fg=ACCENT_RED),
+                    log_status_lbl.config(text="Logging: Unreachable", fg=COLOR_RED),
                     log_files_lbl.config(text="Could not reach head unit to verify logging state.", fg=FG_MUTED)
                 ))
                 return
             if st["enabled"]:
-                status_str = "● Logging: ENABLED (/var/local/data/AA/maintenance active)"
-                color = ACCENT_GREEN_BRIGHT
+                status_str = "Logging: ENABLED (/var/local/data/AA/maintenance active)"
+                color = COLOR_GREEN_BRIGHT
             else:
-                status_str = "○ Logging: DISABLED (Normal mode - no logs written)"
+                status_str = "Logging: DISABLED (Normal mode)"
                 color = FG_MUTED
 
-            files_str = f"Diagnostic files on car: {', '.join(st['files']) if st['files'] else 'None present'}"
+            files_str = f"Diagnostic files on car: {', '.join(st['files']) if st['files'] else 'None'}"
             root.after(0, lambda: (
                 log_status_lbl.config(text=status_str, fg=color),
                 log_files_lbl.config(text=files_str, fg=FG_TEXT)
@@ -1064,19 +1029,10 @@ ACTIVE SAFETY & FAILSAFE SAFEGUARDS:
                     content.append("\n")
 
                 full_text = "\n".join(content)
-                wifi_diag = data.get("wifi_analysis", {})
 
                 def _update_view():
                     log_viewer.delete("1.0", tk.END)
                     log_viewer.insert(tk.END, full_text)
-                    if wifi_diag.get("detected"):
-                        wifi_status_lbl.config(text=wifi_diag.get("summary", ""), fg=ACCENT_GREEN_BRIGHT)
-                        wifi_rec_lbl.config(text=f"Diagnostic Insight: {wifi_diag.get('diagnosis', '')}", fg=BMW_LIGHT_BLUE)
-                        card3_val.config(text=f"{wifi_diag.get('summary', '')[:28]}", fg=ACCENT_GREEN_BRIGHT)
-                        card3_sub.config(text=f"Quality: {wifi_diag.get('diagnosis', '')[:32]}", fg=FG_TEXT)
-                    else:
-                        wifi_status_lbl.config(text="No [WifiLink] records found in current logs.", fg=FG_MUTED)
-                        wifi_rec_lbl.config(text="")
 
                 root.after(0, _update_view)
             update_log_status_ui()
@@ -1094,37 +1050,16 @@ ACTIVE SAFETY & FAILSAFE SAFEGUARDS:
         else:
             messagebox.showinfo("Info", "No logs pulled yet. Click 'Pull Logs to PC' first.")
 
-    create_btn(log_ctrl_row, "🔄 Check Status", update_log_status_ui, bg=BG_CARD, fg=FG_TEXT, hover_bg="#2D333B").pack(side="left", padx=3)
-    create_btn(log_ctrl_row, "✅ Enable Logging", on_enable_logs, bg=ACCENT_GREEN, hover_bg="#2EA043").pack(side="left", padx=3)
-    create_btn(log_ctrl_row, "❌ Disable & Clear", on_disable_clear_logs, bg=ACCENT_RED, hover_bg="#B62324").pack(side="left", padx=3)
-    create_btn(log_ctrl_row, "📥 Pull Logs to PC", on_pull_logs, bg=BMW_BLUE, hover_bg="#388BFD").pack(side="left", padx=6)
-    create_btn(log_ctrl_row, "📂 Open Logs Folder", on_open_folder, bg=BG_CARD, fg=FG_TEXT, hover_bg="#2D333B").pack(side="left", padx=3)
+    create_btn(log_ctrl_row, "Check Status", update_log_status_ui, bg=BG_CARD, fg=FG_TEXT, hover_bg="#2D333B").pack(side="left", padx=3)
+    create_btn(log_ctrl_row, "Enable Logging", on_enable_logs, bg=COLOR_GREEN, hover_bg="#2EA043").pack(side="left", padx=3)
+    create_btn(log_ctrl_row, "Disable & Clear", on_disable_clear_logs, bg=COLOR_RED, hover_bg="#B62324").pack(side="left", padx=3)
+    create_btn(log_ctrl_row, "Pull Logs to PC", on_pull_logs, bg=COLOR_BLUE, hover_bg="#388BFD").pack(side="left", padx=6)
+    create_btn(log_ctrl_row, "Open Logs Folder", on_open_folder, bg=BG_CARD, fg=FG_TEXT, hover_bg="#2D333B").pack(side="left", padx=3)
 
-    # Wi-Fi Link Diagnostics Card
-    wifi_card = create_card(logs_container, "📡 WI-FI LINK DIAGNOSTICS & RF METRICS", "Automated [WifiLink] Telemetry Analysis")
-    wifi_status_lbl = tk.Label(
-        wifi_card,
-        text="No logs pulled yet. Click 'Pull Logs to PC' to analyze wireless connection performance.",
-        bg=BG_PANEL,
-        fg=FG_TEXT,
-        font=("Segoe UI", 9),
-    )
-    wifi_status_lbl.pack(anchor="w", pady=(2, 2))
-
-    wifi_rec_lbl = tk.Label(
-        wifi_card,
-        text="",
-        bg=BG_PANEL,
-        fg=BMW_LIGHT_BLUE,
-        font=("Segoe UI", 9, "bold"),
-    )
-    wifi_rec_lbl.pack(anchor="w", pady=(2, 0))
-
-    # Log Viewer
-    log_viewer_card = create_card(logs_container, "PULLED LOGS VIEWER", "Last 100 lines per file", fill="both")
+    log_viewer_card = create_card(logs_container, "Pulled Logs Viewer", "Last 100 lines per file", fill="both")
     log_viewer = scrolledtext.ScrolledText(
         log_viewer_card,
-        height=10,
+        height=12,
         bg=BG_INPUT,
         fg=FG_TEXT,
         font=("Consolas", 9),
@@ -1132,187 +1067,6 @@ ACTIVE SAFETY & FAILSAFE SAFEGUARDS:
         bd=0,
     )
     log_viewer.pack(fill="both", expand=True)
-
-    # =========================================================================
-    # TAB 4: IDRIVE SETTINGS & FLAGS
-    # =========================================================================
-    set_container = tk.Frame(tab_settings, bg=BG_DARK, padx=8, pady=8)
-    set_container.pack(fill="both", expand=True)
-
-    # Actions Card
-    set_actions_card = create_card(set_container, "HEAD UNIT MAINTENANCE ACTIONS", "Direct System Controls")
-    set_act_row = tk.Frame(set_actions_card, bg=BG_PANEL)
-    set_act_row.pack(fill="x", pady=2)
-
-    def on_reset_app_guard():
-        def _worker():
-            cfg = CarConfigManager(get_ssh())
-            cfg.reset_app_guard()
-        threading.Thread(target=_worker, daemon=True).start()
-
-    def on_explore_opt_aa():
-        def _worker():
-            ssh = get_ssh()
-            GLOBAL_LOGGER.log("INFO", "Listing binaries and permissions in /opt/aa and plugins...")
-            ssh.run_command("ls -la /opt/aa /opt/hmi/data/ro/Plugins/EntryAad")
-        threading.Thread(target=_worker, daemon=True).start()
-
-    def on_uninstall():
-        if messagebox.askyesno(
-            "CONFIRM UNINSTALL",
-            "Are you sure you want to completely uninstall EntryNav2 Android Auto from the car?\nThis will remove /opt/aa, plugins, and reset configurations.",
-        ):
-            def _worker():
-                GLOBAL_LOGGER.log("WARN", "Removing Android Auto from head unit...")
-                cmd = """
-mount -o remount,rw / && \\
-rm -rf /opt/hmi/data/ro/Plugins/EntryAad /opt/aa && \\
-sync && \\
-(mount -o remount,ro / 2>/dev/null || true) && \\
-rm -rf /var/local/data/AA
-"""
-                code, out, err = get_ssh().run_command(cmd)
-                get_ssh().run_command("sync; mount -o remount,ro / 2>/dev/null || true")
-                if code == 0:
-                    GLOBAL_LOGGER.log("OK", "✅ Android Auto uninstalled. Reboot head unit to finish.")
-                    root.after(0, lambda: aa_badge_pill.config(text=" AA: ● Not Installed ", bg="#3A1515", fg=ACCENT_RED))
-                else:
-                    GLOBAL_LOGGER.log("ERROR", f"❌ Uninstall failed: {err}")
-            threading.Thread(target=_worker, daemon=True).start()
-
-    create_btn(set_act_row, "🔍 Check AA Version", lambda: retrieve_installed_version_action(show_dialog=True), bg=ACCENT_GREEN, hover_bg="#2EA043").pack(side="left", padx=3)
-    create_btn(set_act_row, "📁 Explore /opt/aa", on_explore_opt_aa, bg=BG_CARD, fg=FG_TEXT, hover_bg="#2D333B").pack(side="left", padx=3)
-    create_btn(set_act_row, "🛡️ Reset App Guard", on_reset_app_guard, bg=BG_CARD, fg=FG_TEXT, hover_bg="#2D333B").pack(side="left", padx=3)
-    create_btn(set_act_row, "🔄 Reboot Head Unit", reboot_hu, bg=ACCENT_PURPLE, hover_bg="#A371F7").pack(side="left", padx=3)
-    create_btn(set_act_row, "⚠️ Safe Uninstall", on_uninstall, bg=ACCENT_RED, hover_bg="#B62324").pack(side="right", padx=3)
-
-    # Disconnect-Safe Feature Flags Card
-    flags_card = create_card(set_container, "DISCONNECT-SAFE IDRIVE CONFIGURATION FLAGS", "Preserves state during disconnects (/var/local/data/AA)", fill="both")
-    flags_dict = {key: tk.BooleanVar(value=False) for key in SUPPORTED_FLAGS}
-
-    flags_grid = tk.Frame(flags_card, bg=BG_PANEL)
-    flags_grid.pack(fill="both", expand=True, pady=4)
-    flags_grid.columnconfigure(0, weight=1)
-    flags_grid.columnconfigure(1, weight=1)
-
-    flag_descriptions = {
-        "autostart": "Auto-start Android Auto daemon immediately on iDrive boot",
-        "usb": "Force USB wired connection (disables Wi-Fi requirement)",
-        "entry-direct": "Launch directly into Android Auto without sub-menu navigation",
-        "kombi-off": "Disable turn-by-turn navigation arrows in instrument cluster / HUD",
-        "kombi-single-maneuver": "Display single maneuver route graph (for clusters rejecting full graphs)",
-        "gps-telephone": "Use phone's internal GPS antenna instead of vehicle roof antenna",
-    }
-
-    row_idx = 0
-    for key, label in SUPPORTED_FLAGS.items():
-        col_idx = row_idx % 2
-        r = row_idx // 2
-        item_box = tk.Frame(flags_grid, bg=BG_CARD, padx=10, pady=8, highlightbackground=BORDER_COLOR, highlightthickness=1)
-        item_box.grid(row=r, column=col_idx, sticky="nsew", padx=4, pady=4)
-
-        cb = tk.Checkbutton(
-            item_box,
-            text=f" {key}",
-            variable=flags_dict[key],
-            bg=BG_CARD,
-            fg=BMW_LIGHT_BLUE,
-            selectcolor=BG_INPUT,
-            activebackground=BG_CARD,
-            activeforeground=BMW_LIGHT_BLUE,
-            font=("Segoe UI", 10, "bold"),
-        )
-        cb.pack(anchor="w")
-
-        desc_text = flag_descriptions.get(key, label)
-        tk.Label(item_box, text=desc_text, bg=BG_CARD, fg=FG_TEXT, font=("Segoe UI", 8), wraplength=420, justify="left").pack(anchor="w", padx=20, pady=(2, 0))
-        row_idx += 1
-
-    def read_flags():
-        def _worker():
-            cfg = CarConfigManager(get_ssh())
-            success, flags = cfg.read_flags()
-            if success:
-                for key, val in flags.items():
-                    if key in flags_dict:
-                        root.after(0, lambda v=flags_dict[key], s=val: v.set(s))
-            else:
-                GLOBAL_LOGGER.log("WARN", "Flags preserved (did not overwrite local selections while offline).")
-        threading.Thread(target=_worker, daemon=True).start()
-
-    def save_flags():
-        def _worker():
-            cfg = CarConfigManager(get_ssh())
-            current = {k: v.get() for k, v in flags_dict.items()}
-            cfg.save_flags(current)
-            update_log_status_ui()
-        threading.Thread(target=_worker, daemon=True).start()
-
-    flags_btn_row = tk.Frame(flags_card, bg=BG_PANEL)
-    flags_btn_row.pack(fill="x", pady=6)
-    create_btn(flags_btn_row, "Read Settings from Car", read_flags, bg=BG_CARD, fg=FG_TEXT, hover_bg="#2D333B").pack(side="left", padx=4)
-    create_btn(flags_btn_row, "💾 Save Settings to Car", save_flags, bg=ACCENT_GREEN, hover_bg="#2EA043").pack(side="left", padx=6)
-
-    # =========================================================================
-    # TAB 5: ENET NETWORK DIAGNOSTICS
-    # =========================================================================
-    net_container = tk.Frame(tab_net, bg=BG_DARK, padx=8, pady=8)
-    net_container.pack(fill="both", expand=True)
-
-    net_card = create_card(net_container, "ENET CABLE & NETWORK ADAPTER INSPECTOR", "Scans Windows Adapters & Pings Car")
-    net_info_lbl = tk.Label(net_card, text="Click 'Scan Network Adapters' to check ENET link status.", bg=BG_PANEL, fg=FG_TEXT, font=("Segoe UI", 9), justify="left")
-    net_info_lbl.pack(anchor="w", pady=4)
-
-    def scan_network():
-        def _worker():
-            GLOBAL_LOGGER.log("INFO", "Scanning local network adapters for ENET connection...")
-            summary = NetworkDiagnostics.get_adapter_summary()
-            ping_ok, ping_msg = NetworkDiagnostics.ping_host(ip_var.get().strip())
-
-            lines = [
-                f"• Link Status:       {summary['recommendation']}",
-                f"• Head Unit Ping:    {ping_msg}",
-                f"• Active Adapters:   {len(summary['active_adapters'])} detected"
-            ]
-            for ad in summary["active_adapters"]:
-                lines.append(f"  - {ad.get('name', 'Adapter')}: {ad.get('ip', 'N/A')}")
-
-            full_text = "\n".join(lines)
-            root.after(0, lambda: net_info_lbl.config(text=full_text))
-            card4_sub.config(text=f"Ping: {'OK' if ping_ok else 'No response'}", fg=ACCENT_GREEN_BRIGHT if ping_ok else ACCENT_RED)
-            GLOBAL_LOGGER.log("OK" if (summary["has_apipa"] or ping_ok) else "WARN", ping_msg)
-        threading.Thread(target=_worker, daemon=True).start()
-
-    create_btn(net_card, "🔍 Scan Network Adapters & Ping Car", scan_network, bg=BMW_BLUE, hover_bg="#388BFD").pack(anchor="w", pady=6)
-
-    net_guide_card = create_card(net_container, "ENET OBD2 HARDWARE & TROUBLESHOOTING GUIDE", "Automotive Operational Checklist", fill="both")
-    net_guide = scrolledtext.ScrolledText(net_guide_card, height=12, bg=BG_INPUT, fg=FG_TEXT, font=("Consolas", 9), relief="flat", bd=0)
-    net_guide.pack(fill="both", expand=True)
-    net_guide.insert(
-        tk.END,
-        """=== ENET OBD2 Hardware & Connection Troubleshooting Guide ===
-
-1. Operational Profile: Engine Running (Park / P)
-   • Keep the car engine running so the alternator delivers continuous ~14.2V power.
-   • This prevents battery drain, sleep-mode shutdowns, and terminal 15 timeouts.
-
-2. Physical Connection:
-   • Plug the OBD2 connector firmly into the driver footwell port.
-   • Connect the RJ45 Ethernet cable to your PC (or via USB-C Ethernet adapter).
-
-3. Windows Auto-IP (APIPA 169.254.x.x):
-   • In Windows Network Settings, leave your Ethernet adapter on 'Automatic (DHCP)'.
-   • The BMW head unit assigns an automatic IP (169.254.x.x).
-   • Note: Windows often takes 15-30 seconds to configure this link. If ping fails,
-     wait 20 seconds and click 'Scan Network Adapters & Ping Car' again.
-
-4. Default Connection Parameters:
-   • Head Unit IP: 169.254.1.0
-   • Port:         22
-   • Username:     root
-   • Password:     Entry0?Evo!1
-""",
-    )
 
     # Tab change listener
     def on_tab_changed(event):
@@ -1331,7 +1085,7 @@ rm -rf /var/local/data/AA
     # Initialize with verified built-in releases
     fetched_releases.extend(BUILTIN_RELEASES)
     display_items = [
-        f"{r['tag']} ({r['published_at']}) {'[PRE-RELEASE]' if r['prerelease'] else '[STABLE]'}"
+        f"{r['tag']} ({r['published_at']}) {'[Pre-Release]' if r['prerelease'] else '[Stable]'}"
         for r in BUILTIN_RELEASES
     ]
     rel_combobox["values"] = display_items
@@ -1339,7 +1093,7 @@ rm -rf /var/local/data/AA
         rel_combobox.current(0)
         on_rel_selected(None)
 
-    # Refresh releases from GitHub live in background
+    # Fetch live releases in background
     fetch_rels()
 
     root.mainloop()
